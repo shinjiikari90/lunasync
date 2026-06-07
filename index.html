@@ -1268,8 +1268,8 @@ function buildTrackRow(label, start, end, cls, txt) {
   var e = ((end   % 1440) + 1440) % 1440;
   var segs = "";
   if (s < e) {
-    var wPct = ((e - s) / 144 * 00).toFixed(2);
-    var pPct = (s / 144 * 00).toFixed(2);
+    var wPct = ((e - s) / 1440 * 100).toFixed(2);
+    var pPct = (s / 1440 * 100).toFixed(2);
     segs = "<div class=\"tl-segment " + cls + "\""
       + " style=\"position:absolute;top:0;height:100%;"
       + "left:" + pPct + "%;width:" + wPct + "%;border-radius:4px;"
@@ -1278,9 +1278,9 @@ function buildTrackRow(label, start, end, cls, txt) {
       + " title=\"" + minsToTime(s) + " ~ " + minsToTime(e) + "\">"
       + (parseFloat(wPct) > 5 ? txt : "") + "</div>";
   } else {
-    var w1 = ((1440 - s) / 144 * 00).toFixed(2);
-    var w2 = (e / 144 * 00).toFixed(2);
-    var p1 = (s / 144 * 00).toFixed(2);
+    var w1 = ((1440 - s) / 1440 * 100).toFixed(2);
+    var w2 = (e / 1440 * 100).toFixed(2);
+    var p1 = (s / 1440 * 100).toFixed(2);
     segs = "<div class=\"tl-segment " + cls + "\""
       + " style=\"position:absolute;top:0;height:100%;"
       + "left:" + p1 + "%;width:" + w1 + "%;border-radius:4px;"
@@ -1334,15 +1334,15 @@ function buildTrack(label, start, end, cls, txt) {
   var e = ((end   % 1440) + 1440) % 1440;
   var segs = "";
   if (s < e) {
-    var wPct = ((e - s) / 144 * 00).toFixed(2);
-    var pPct = (s / 144 * 00).toFixed(2);
+    var wPct = ((e - s) / 1440 * 100).toFixed(2);
+    var pPct = (s / 1440 * 100).toFixed(2);
     segs = "<div class=\"tl-segment " + cls + "\" style=\"left:" + pPct + "%;width:" + wPct + "%;\" title=\""
       + minsToTime(s) + " ~ " + minsToTime(e) + "\">"
       + (parseFloat(wPct) > 5 ? txt : "") + "</div>";
   } else {
-    var w1 = ((1440 - s) / 144 * 00).toFixed(2);
-    var w2 = (e / 144 * 00).toFixed(2);
-    segs = "<div class=\"tl-segment " + cls + "\" style=\"left:" + (s / 144 * 00).toFixed(2) + "%;width:" + w1 + "%;\" title=\""
+    var w1 = ((1440 - s) / 1440 * 100).toFixed(2);
+    var w2 = (e / 1440 * 100).toFixed(2);
+    segs = "<div class=\"tl-segment " + cls + "\" style=\"left:" + (s / 1440 * 100).toFixed(2) + "%;width:" + w1 + "%;\" title=\""
       + minsToTime(s) + " ~ 24:00\">"
       + (parseFloat(w1) > 5 ? txt : "") + "</div>";
     if (parseFloat(w2) > 0) {
