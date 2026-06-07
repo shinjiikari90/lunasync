@@ -848,8 +848,8 @@ function calculate() {
   else                    { direction = "same"; dirLabel = "시차 거의 없음";             dirClass = "dir-same"; }
 
   /* 적응에 필요한 총 일수 */
-  var daysToAdapt = direction === "east" ? Math.ceil(crossedZone * .5)
-                  : direction === "west" ? Math.ceil(crossedZone * .67)
+  var daysToAdapt = direction === "east" ? Math.ceil(crossedZones * .5)
+                  : direction === "west" ? Math.ceil(crossedZones * .67)
                   : 0;
 
   /* 1일차 취침: 평소 취침 시간 그대로 (도착지 현지 기준) */
