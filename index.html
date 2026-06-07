@@ -3,43 +3,97 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>JetSync – 시차적응 도우미</title>
+<title>LunaSync – 시차적응 도우미</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/*
+  수면 과학 기반 색상 시스템
+  - 배경: 딥 차콜 (#1a1410) - 따뜻한 어둠, 멜라토닌 친화적
+  - 아침/각성: 스카이블루 (#4fc3f7) - 청색광 = 위상 전진
+  - 저녁/취침: 앰버/테라코타 (#e8956d, #d4704a) - 멜라토닌 촉진
+  - 수면 중: 딥 레드/마룬 (#c0392b 계열) - 일주기 비간섭
+  - 선글라스: 골드 앰버 (#f0a500) - 청색광 차단
+  - 강조: 따뜻한 크림 (#f5e6d3)
+*/
 :root {
-  --bg: #0d0f1a; --card: #161928; --card2: #1c2035; --border: #2a2f4a;
-  --accent: #6c63ff; --accent2: #a78bfa; --sun: #f59e0b; --sun-light: #fde68a;
-  --moon: #818cf8; --moon-light: #c7d2fe; --sleep: #3b82f6; --awake: #10b981;
-  --sunglass: #f97316; --danger: #ef4444; --text: #e2e8f0;
-  --text-muted: #94a3b8; --text-dim: #64748b; --radius: 16px; --radius-sm: 10px;
-  --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  --bg:           #1a1410;
+  --bg2:          #221c16;
+  --card:         #2a221a;
+  --card2:        #332a20;
+  --border:       #4a3d2e;
+  --border-light: #5c4d3a;
+
+  --morning:      #4fc3f7;   /* 아침 청색광 */
+  --morning-dim:  #1a4a5e;
+  --morning-glow: rgba(79,195,247,.18);
+
+  --amber:        #e8956d;   /* 저녁 앰버 */
+  --amber-dark:   #d4704a;
+  --amber-dim:    #5e2e14;
+  --amber-glow:   rgba(232,149,109,.18);
+
+  --sleep:        #b85c6e;   /* 수면 딥 로즈-레드 */
+  --sleep-dark:   #8b3a50;
+  --sleep-dim:    #4a1a26;
+  --sleep-glow:   rgba(184,92,110,.18);
+
+  --sunglass:     #f0a500;   /* 선글라스 골드 */
+  --sunglass-dim: #5a3a00;
+  --sunglass-glow:rgba(240,165,0,.18);
+
+  --awake:        #6ec6a0;   /* 기상 민트그린 */
+  --awake-dim:    #1a4a34;
+  --awake-glow:   rgba(110,198,160,.18);
+
+  --cream:        #f5e6d3;
+  --text:         #ede0d0;
+  --text-muted:   #a89070;
+  --text-dim:     #6e5a46;
+
+  --accent:       #e8956d;
+  --accent2:      #f5c89a;
+
+  --danger:       #e05252;
+  --radius:       16px;
+  --radius-sm:    10px;
+  --shadow:       0 8px 32px rgba(0,0,0,.5);
 }
+
 html { scroll-behavior: smooth; }
 body {
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.6;
 }
+
+/* ── HEADER ── */
 header {
-  background: linear-gradient(135deg, #1a1040 0%, #0d0f1a 60%);
-  border-bottom: 1px solid var(--border); padding: 20px 24px;
+  background: linear-gradient(135deg, #2e1e10 0%, #1a1410 70%);
+  border-bottom: 1px solid var(--border);
+  padding: 18px 24px;
   display: flex; align-items: center; gap: 14px;
-  position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px);
+  position: sticky; top: 0; z-index: 100;
+  backdrop-filter: blur(12px);
 }
 .logo-icon {
   width: 44px; height: 44px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--amber), var(--amber-dark));
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
   font-size: 22px; flex-shrink: 0;
+  box-shadow: 0 4px 16px var(--amber-glow);
 }
-header h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
-header h1 span { color: var(--accent2); }
+header h1 { font-size: 22px; font-weight: 800; letter-spacing: -.5px; color: var(--cream); }
+header h1 span { color: var(--amber); }
 header p { font-size: 13px; color: var(--text-muted); margin-top: 1px; }
+
+/* ── STEP BAR ── */
 .steps-bar {
   display: flex; align-items: center; justify-content: center;
-  gap: 0; padding: 20px 24px 0; max-width: 700px; margin: 0 auto;
+  padding: 22px 24px 0; max-width: 700px; margin: 0 auto;
 }
 .step-item {
   display: flex; flex-direction: column; align-items: center;
@@ -47,11 +101,11 @@ header p { font-size: 13px; color: var(--text-muted); margin-top: 1px; }
 }
 .step-item:not(:last-child)::after {
   content: ''; position: absolute; top: 17px;
-  left: calc(50% + 18px); width: calc(100% - 36px); height: 2px;
-  background: var(--border); z-index: 0;
+  left: calc(50% + 18px); width: calc(100% - 36px);
+  height: 2px; background: var(--border); z-index: 0;
 }
 .step-item.done:not(:last-child)::after,
-.step-item.active:not(:last-child)::after { background: var(--accent); }
+.step-item.active:not(:last-child)::after { background: var(--amber); }
 .step-num {
   width: 34px; height: 34px; border-radius: 50%;
   background: var(--card2); border: 2px solid var(--border);
@@ -60,51 +114,66 @@ header p { font-size: 13px; color: var(--text-muted); margin-top: 1px; }
   z-index: 1; transition: all .3s;
 }
 .step-item.active .step-num {
-  background: var(--accent); border-color: var(--accent); color: #fff;
-  box-shadow: 0 0 14px rgba(108,99,255,.5);
+  background: var(--amber); border-color: var(--amber); color: #fff;
+  box-shadow: 0 0 16px var(--amber-glow);
 }
-.step-item.done .step-num { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+.step-item.done .step-num {
+  background: var(--awake); border-color: var(--awake); color: #fff;
+}
 .step-label { font-size: 11px; font-weight: 500; color: var(--text-dim); white-space: nowrap; }
-.step-item.active .step-label { color: var(--accent2); }
-.step-item.done .step-label { color: var(--text-muted); }
+.step-item.active .step-label { color: var(--amber); }
+.step-item.done  .step-label { color: var(--text-muted); }
+
+/* ── MAIN ── */
 main { max-width: 760px; margin: 0 auto; padding: 24px 16px 60px; }
+
 .card {
   background: var(--card); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 24px; margin-bottom: 20px; box-shadow: var(--shadow);
+  border-radius: var(--radius); padding: 24px; margin-bottom: 20px;
+  box-shadow: var(--shadow);
 }
 .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
 .card-icon {
   width: 40px; height: 40px; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
 }
-.ci-sleep { background: rgba(59,130,246,.18); }
-.ci-flight { background: rgba(108,99,255,.18); }
-.ci-result { background: rgba(16,185,129,.18); }
-.card-title { font-size: 17px; font-weight: 700; }
-.card-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.ci-sleep    { background: var(--sleep-dim);     box-shadow: 0 2px 10px var(--sleep-glow); }
+.ci-flight   { background: var(--morning-dim);   box-shadow: 0 2px 10px var(--morning-glow); }
+.ci-result   { background: var(--amber-dim);     box-shadow: 0 2px 10px var(--amber-glow); }
+.card-title  { font-size: 17px; font-weight: 700; color: var(--cream); }
+.card-sub    { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* ── FORMS ── */
 .form-grid { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
-.form-grid.col1 { grid-template-columns: 1fr; }
 @media (max-width: 520px) { .form-grid { grid-template-columns: 1fr; } }
 .form-group { display: flex; flex-direction: column; gap: 6px; }
 .form-group label {
   font-size: 12px; font-weight: 600; color: var(--text-muted);
   text-transform: uppercase; letter-spacing: .5px;
 }
-.form-group label span { font-size: 16px; margin-right: 4px; }
-input[type="time"], input[type="date"], input[type="number"], select {
+input[type="time"], input[type="date"],
+input[type="number"], select {
   background: var(--card2); border: 1px solid var(--border);
   border-radius: var(--radius-sm); color: var(--text);
   font-family: inherit; font-size: 14px; font-weight: 500;
   padding: 10px 14px; width: 100%; outline: none;
-  transition: border-color .2s, box-shadow .2s; -webkit-appearance: none; appearance: none;
+  transition: border-color .2s, box-shadow .2s;
+  -webkit-appearance: none; appearance: none;
 }
 input:focus, select:focus {
-  border-color: var(--accent); box-shadow: 0 0 0 3px rgba(108,99,255,.2);
+  border-color: var(--amber);
+  box-shadow: 0 0 0 3px var(--amber-glow);
 }
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(.6) sepia(1) hue-rotate(10deg); }
 select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: right 12px center; padding-right: 34px; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23a89070' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center;
+  padding-right: 34px; cursor: pointer;
 }
+
+/* ── CHRONOTYPE ── */
 .chronotype-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-top: 4px; }
 @media (max-width: 520px) { .chronotype-grid { grid-template-columns: repeat(2,1fr); } }
 .chrono-btn {
@@ -113,22 +182,27 @@ select {
   background: var(--card2); cursor: pointer; transition: all .2s;
   color: var(--text-muted); font-family: inherit;
 }
-.chrono-btn:hover { border-color: var(--accent2); color: var(--text); }
-.chrono-btn.selected { border-color: var(--accent); background: rgba(108,99,255,.15); color: var(--text); }
-.chrono-btn .icon { font-size: 22px; }
+.chrono-btn:hover { border-color: var(--amber); color: var(--text); }
+.chrono-btn.selected {
+  border-color: var(--amber); background: var(--amber-dim); color: var(--cream);
+  box-shadow: 0 2px 12px var(--amber-glow);
+}
+.chrono-btn .icon  { font-size: 22px; }
 .chrono-btn .label { font-size: 11px; font-weight: 600; }
-.chrono-btn .time { font-size: 10px; color: var(--text-dim); }
+.chrono-btn .time  { font-size: 10px; color: var(--text-dim); }
+
+/* ── BUTTONS ── */
 .btn {
   display: inline-flex; align-items: center; justify-content: center;
   gap: 8px; border: none; border-radius: var(--radius-sm);
   cursor: pointer; font-family: inherit; font-weight: 700; transition: all .2s;
 }
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent), #8b5cf6); color: #fff;
+  background: linear-gradient(135deg, var(--amber), var(--amber-dark)); color: #fff;
   padding: 14px 28px; font-size: 15px; width: 100%;
-  box-shadow: 0 4px 20px rgba(108,99,255,.4);
+  box-shadow: 0 4px 20px var(--amber-glow);
 }
-.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(108,99,255,.55); }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(232,149,109,.55); }
 .btn-primary:active { transform: translateY(0); }
 .btn-secondary {
   background: var(--card2); border: 1px solid var(--border);
@@ -136,28 +210,79 @@ select {
 }
 .btn-secondary:hover { background: var(--border); color: var(--text); }
 .btn-save {
-  background: linear-gradient(135deg, #10b981, #059669); color: #fff;
-  padding: 12px 22px; font-size: 14px; box-shadow: 0 4px 16px rgba(16,185,129,.35);
+  background: linear-gradient(135deg, var(--awake), #4aaa80); color: #fff;
+  padding: 12px 22px; font-size: 14px;
+  box-shadow: 0 4px 16px var(--awake-glow);
 }
-.btn-save:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(16,185,129,.5); }
+.btn-save:hover { transform: translateY(-1px); }
 .btn-reset {
   background: transparent; border: 1px solid var(--border);
   color: var(--text-dim); padding: 12px 22px; font-size: 14px;
 }
 .btn-reset:hover { border-color: var(--danger); color: var(--danger); }
 .btn-row { display: flex; gap: 10px; margin-top: 6px; flex-wrap: wrap; }
+
 .hidden { display: none !important; }
 .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
-.info-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+
+/* ── BADGES ── */
 .badge {
   display: inline-flex; align-items: center; gap: 5px;
   padding: 5px 12px; border-radius: 99px; font-size: 12px; font-weight: 600;
 }
-.badge-purple { background: rgba(108,99,255,.15); color: var(--accent2); border: 1px solid rgba(108,99,255,.3); }
-.badge-yellow { background: rgba(245,158,11,.12); color: var(--sun-light); border: 1px solid rgba(245,158,11,.3); }
-.badge-blue   { background: rgba(59,130,246,.12);  color: #93c5fd; border: 1px solid rgba(59,130,246,.3); }
-.badge-green  { background: rgba(16,185,129,.12);  color: #6ee7b7; border: 1px solid rgba(16,185,129,.3); }
-.badge-red    { background: rgba(249,115,22,.12);  color: #fdba74; border: 1px solid rgba(249,115,22,.3); }
+.badge-amber  { background: var(--amber-dim);    color: var(--accent2);  border: 1px solid rgba(232,149,109,.3); }
+.badge-blue   { background: var(--morning-dim);  color: #90caf9;         border: 1px solid rgba(79,195,247,.3); }
+.badge-green  { background: var(--awake-dim);    color: #a5d6bc;         border: 1px solid rgba(110,198,160,.3); }
+.badge-red    { background: var(--sleep-dim);    color: #e8a0aa;         border: 1px solid rgba(184,92,110,.3); }
+.info-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+
+/* ── DIRECTION BADGE ── */
+.dir-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 99px; font-size: 13px; font-weight: 700;
+}
+.dir-east { background: rgba(232,149,109,.12); border: 1px solid rgba(232,149,109,.3); color: var(--accent2); }
+.dir-west { background: var(--awake-dim);      border: 1px solid rgba(110,198,160,.3); color: #a5d6bc; }
+.dir-same { background: rgba(110,90,70,.2);    border: 1px solid var(--border);        color: var(--text-muted); }
+
+/* ── SUMMARY BOX ── */
+.summary-box {
+  background: linear-gradient(135deg, rgba(232,149,109,.1), rgba(212,112,74,.06));
+  border: 1px solid rgba(232,149,109,.25);
+  border-radius: var(--radius-sm); padding: 16px 18px; margin-bottom: 18px;
+}
+.summary-box h3 { font-size: 14px; font-weight: 700; margin-bottom: 8px; color: var(--accent2); }
+.summary-kv { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+.summary-kv dt { font-size: 11px; color: var(--text-dim); }
+.summary-kv dd { font-size: 13px; font-weight: 600; color: var(--cream); margin-top: 1px; }
+
+/* ── ALERT ── */
+.alert {
+  padding: 12px 16px; border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 500; margin-bottom: 14px;
+  display: flex; align-items: flex-start; gap: 8px;
+}
+.alert-warn { background: rgba(240,165,0,.1);  border: 1px solid rgba(240,165,0,.3);  color: #fde68a; }
+.alert-info { background: var(--morning-dim);  border: 1px solid rgba(79,195,247,.3); color: #90caf9; }
+
+/* ── DAY TABS ── */
+.day-tabs {
+  display: flex; gap: 6px; overflow-x: auto;
+  padding-bottom: 4px; margin-bottom: 18px;
+}
+.day-tab {
+  flex-shrink: 0; padding: 7px 16px; border-radius: 99px;
+  border: 1px solid var(--border); background: var(--card2);
+  color: var(--text-muted); font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all .2s; font-family: inherit;
+}
+.day-tab:hover { border-color: var(--amber); color: var(--text); }
+.day-tab.active {
+  background: var(--amber-dim); border-color: var(--amber);
+  color: var(--accent2); box-shadow: 0 2px 10px var(--amber-glow);
+}
+
+/* ── TIMELINE ── */
 .timeline-wrapper { overflow-x: auto; padding-bottom: 8px; margin: 0 -4px; }
 .timeline-container { min-width: 560px; position: relative; padding: 10px 0 6px; }
 .tl-hours { display: flex; height: 20px; margin-bottom: 6px; }
@@ -166,11 +291,13 @@ select {
   font-weight: 500; position: relative;
 }
 .tl-hour::before {
-  content: ''; position: absolute; top: -4px; left: 0; width: 1px; height: 6px; background: var(--border);
+  content: ''; position: absolute; top: -4px; left: 0;
+  width: 1px; height: 6px; background: var(--border);
 }
 .tl-track {
-  height: 32px; background: rgba(255,255,255,.04); border-radius: 8px;
-  position: relative; overflow: hidden; margin-bottom: 6px; border: 1px solid var(--border);
+  height: 32px; background: rgba(255,255,255,.03);
+  border-radius: 8px; position: relative; overflow: hidden;
+  margin-bottom: 6px; border: 1px solid var(--border);
 }
 .tl-segment {
   position: absolute; top: 0; height: 100%; border-radius: 4px;
@@ -178,99 +305,103 @@ select {
   font-size: 10px; font-weight: 700; overflow: hidden; white-space: nowrap;
   transition: opacity .2s; cursor: default;
 }
-.tl-segment:hover { opacity: .85; }
-.tl-seg-sun     { background: linear-gradient(90deg, #f59e0b, #fbbf24); color: #78350f; }
-.tl-seg-dark    { background: linear-gradient(90deg, #1e40af, #1d4ed8); color: #bfdbfe; }
-.tl-seg-sleep   { background: linear-gradient(90deg, #2563eb, #3b82f6); color: #eff6ff; }
-.tl-seg-awake   { background: linear-gradient(90deg, #059669, #10b981); color: #d1fae5; }
-.tl-seg-sunglass{ background: linear-gradient(90deg, #ea580c, #f97316); color: #fff7ed; }
-.tl-label { font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; margin-top: 8px; display: flex; align-items: center; gap: 5px; }
+.tl-segment:hover { opacity: .8; }
+.tl-seg-morning  { background: linear-gradient(90deg, #1a6a8a, #4fc3f7); color: #e0f7ff; }
+.tl-seg-sleep    { background: linear-gradient(90deg, var(--sleep-dark), var(--sleep)); color: #ffe0e6; }
+.tl-seg-awake    { background: linear-gradient(90deg, #2a7a58, var(--awake)); color: #e0fff4; }
+.tl-seg-amber    { background: linear-gradient(90deg, #8a4a00, var(--sunglass)); color: #fff8e0; }
+.tl-label {
+  font-size: 11px; font-weight: 600; color: var(--text-muted);
+  margin-bottom: 4px; margin-top: 8px;
+  display: flex; align-items: center; gap: 5px;
+}
+
+/* ── SCHEDULE LIST ── */
 .schedule-list { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
 .sched-item {
   display: flex; align-items: center; gap: 14px;
-  padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid; transition: transform .15s;
+  padding: 14px 16px; border-radius: var(--radius-sm);
+  border: 1px solid; transition: transform .15s;
 }
 .sched-item:hover { transform: translateX(3px); }
-.sched-sun      { background: rgba(245,158,11,.07);  border-color: rgba(245,158,11,.2); }
-.sched-dark     { background: rgba(99,102,241,.07);  border-color: rgba(99,102,241,.2); }
-.sched-sleep    { background: rgba(59,130,246,.07);  border-color: rgba(59,130,246,.2); }
-.sched-awake    { background: rgba(16,185,129,.07);  border-color: rgba(16,185,129,.2); }
-.sched-sunglass { background: rgba(249,115,22,.07);  border-color: rgba(249,115,22,.2); }
-.sched-icon { font-size: 24px; flex-shrink: 0; }
-.sched-info { flex: 1; min-width: 0; }
+
+.sched-morning  { background: var(--morning-glow); border-color: rgba(79,195,247,.2); }
+.sched-amber    { background: var(--amber-glow);   border-color: rgba(232,149,109,.2); }
+.sched-sleep    { background: var(--sleep-glow);   border-color: rgba(184,92,110,.2); }
+.sched-awake    { background: var(--awake-glow);   border-color: rgba(110,198,160,.2); }
+.sched-sunglass { background: var(--sunglass-glow);border-color: rgba(240,165,0,.2); }
+
+.sched-icon  { font-size: 24px; flex-shrink: 0; }
+.sched-info  { flex: 1; min-width: 0; }
 .sched-title { font-size: 14px; font-weight: 700; }
 .sched-time  { font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; margin-top: 2px; }
 .sched-desc  { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
 .sched-day   { font-size: 11px; font-weight: 600; color: var(--text-dim); white-space: nowrap; }
-.sun-color      { color: var(--sun-light); }
-.dark-color     { color: var(--moon-light); }
-.sleep-color    { color: #93c5fd; }
-.awake-color    { color: #6ee7b7; }
-.sunglass-color { color: #fdba74; }
-.summary-box {
-  background: linear-gradient(135deg, rgba(108,99,255,.12), rgba(167,139,250,.08));
-  border: 1px solid rgba(108,99,255,.25); border-radius: var(--radius-sm);
-  padding: 16px 18px; margin-bottom: 18px;
-}
-.summary-box h3 { font-size: 14px; font-weight: 700; margin-bottom: 8px; color: var(--accent2); }
-.summary-kv { display: flex; flex-wrap: wrap; gap: 8px 20px; }
-.summary-kv dt { font-size: 11px; color: var(--text-dim); }
-.summary-kv dd { font-size: 13px; font-weight: 600; margin-top: 1px; }
+
+.morning-color  { color: var(--morning); }
+.amber-color    { color: var(--accent2); }
+.sleep-color    { color: #e8a0aa; }
+.awake-color    { color: var(--awake); }
+.sunglass-color { color: var(--sunglass); }
+
+/* ── TIPS ── */
 .tips-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px; }
 @media (max-width: 520px) { .tips-grid { grid-template-columns: 1fr; } }
-.tip-card { background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; }
-.tip-card .tip-head { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+.tip-card {
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 14px;
+}
+.tip-card .tip-head {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--cream);
+}
 .tip-card p { font-size: 12px; color: var(--text-muted); line-height: 1.55; }
-.day-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 18px; }
-.day-tab {
-  flex-shrink: 0; padding: 7px 16px; border-radius: 99px;
-  border: 1px solid var(--border); background: var(--card2); color: var(--text-muted);
-  font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s; font-family: inherit;
-}
-.day-tab:hover { border-color: var(--accent2); color: var(--text); }
-.day-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 2px 10px rgba(108,99,255,.4); }
+
+/* ── EXPORT CARD ── */
 .export-card {
-  background: linear-gradient(135deg, rgba(16,185,129,.1), rgba(5,150,105,.06));
-  border: 1px solid rgba(16,185,129,.25); border-radius: var(--radius); padding: 20px 24px; margin-top: 20px;
+  background: linear-gradient(135deg, rgba(110,198,160,.1), rgba(74,170,128,.06));
+  border: 1px solid rgba(110,198,160,.25);
+  border-radius: var(--radius); padding: 20px 24px; margin-top: 20px;
 }
-.export-card h3 { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: #6ee7b7; }
+.export-card h3 {
+  font-size: 15px; font-weight: 700;
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 8px; color: var(--awake);
+}
 .export-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
+
+/* ── SAVE CARD (hidden, for export) ── */
 #save-card {
-  background: #0d0f1a; border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 24px; font-family: 'Pretendard', sans-serif; color: var(--text);
-  position: fixed; top: -9999px; left: -9999px; width: 600px;
+  background: #1a1410; border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px;
+  font-family: 'Pretendard', sans-serif; color: var(--text);
+  position: fixed; top: -9999px; left: -9999px; width: 600px; display: none;
 }
 #save-card .sc-header {
   display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
   border-bottom: 1px solid var(--border); padding-bottom: 14px;
 }
 #save-card .sc-logo {
-  width: 38px; height: 38px; background: linear-gradient(135deg, #6c63ff, #a78bfa);
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--amber), var(--amber-dark));
   border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;
 }
-#save-card .sc-title { font-size: 18px; font-weight: 800; }
-#save-card .sc-sub { font-size: 12px; color: var(--text-muted); }
-.alert {
-  padding: 12px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500;
-  margin-bottom: 14px; display: flex; align-items: flex-start; gap: 8px;
-}
-.alert-warn { background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.3); color: #fde68a; }
-.alert-info { background: rgba(99,102,241,.1); border: 1px solid rgba(99,102,241,.3); color: var(--accent2); }
-.dir-badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 6px 14px; border-radius: 99px; font-size: 13px; font-weight: 700;
-}
-.dir-east { background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.3); color: #fca5a5; }
-.dir-west { background: rgba(16,185,129,.12); border: 1px solid rgba(16,185,129,.3); color: #6ee7b7; }
-.dir-same { background: rgba(148,163,184,.1); border: 1px solid rgba(148,163,184,.2); color: var(--text-muted); }
+#save-card .sc-title { font-size: 18px; font-weight: 800; color: var(--cream); }
+#save-card .sc-sub   { font-size: 12px; color: var(--text-muted); }
+
+/* ── TOAST ── */
 #toast {
-  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(60px);
-  background: #1e293b; border: 1px solid var(--border); color: var(--text);
+  position: fixed; bottom: 30px; left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: var(--card); border: 1px solid var(--border); color: var(--text);
   padding: 12px 22px; border-radius: 99px; font-size: 14px; font-weight: 600;
-  box-shadow: var(--shadow); opacity: 0; transition: all .35s cubic-bezier(.34,1.56,.64,1);
+  box-shadow: var(--shadow); opacity: 0;
+  transition: all .35s cubic-bezier(.34,1.56,.64,1);
   z-index: 999; pointer-events: none; white-space: nowrap;
 }
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── SCROLLBAR ── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
@@ -279,10 +410,10 @@ select {
 <body>
 
 <header>
-  <div class="logo-icon">✈️</div>
+  <div class="logo-icon">🌙</div>
   <div>
-    <h1>Jet<span>Sync</span></h1>
-    <p>시차적응 스마트 도우미</p>
+    <h1>Luna<span>Sync</span></h1>
+    <p>생체리듬 기반 시차적응 도우미</p>
   </div>
 </header>
 
@@ -523,7 +654,7 @@ select {
             <option value="TN">🇹🇳 튀니지 (UTC+1)</option>
             <option value="TZ">🇹🇿 탄자니아 (UTC+3)</option>
           </optgroup>
-          <optgroup label="🗽 미국 – 주(State)">
+          <optgroup label="🗽 미국 주(State)">
             <option value="US_ET_NY">🇺🇸 뉴욕 (ET, UTC-5)</option>
             <option value="US_ET_FL">🇺🇸 플로리다 – 마이애미 (ET, UTC-5)</option>
             <option value="US_ET_MA">🇺🇸 매사추세츠 – 보스턴 (ET, UTC-5)</option>
@@ -647,9 +778,9 @@ select {
 <!-- 이미지 저장용 숨김 영역 -->
 <div id="save-card">
   <div class="sc-header">
-    <div class="sc-logo">✈️</div>
+    <div class="sc-logo">🌙</div>
     <div>
-      <div class="sc-title">JetSync 시차적응 플랜</div>
+      <div class="sc-title">LunaSync 시차적응 플랜</div>
       <div class="sc-sub" id="sc-subtitle"></div>
     </div>
   </div>
@@ -658,246 +789,216 @@ select {
 
 <div id="toast"></div>
 
-<!-- html2canvas -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-<!-- ✅ 모든 JS를 body 최하단, defer 없이 배치 -->
 <script>
-/* ═══════════════════════════════════════
+/* ═══════════════════════════════
    TZ DATA
-═══════════════════════════════════════ */
+═══════════════════════════════ */
 var TZ = {
-  KR:900, JP:900, CN:480, TW:480, HK:480,
-  TH:420, VN:420, SG:480, MY:480, PH:480,
-  ID:420, ID_E:480, ID_EE:540,
-  KH:420, MM:390, LA:420, MN:480,
-  IN:330, LK:330, BD:360, NP:345, PK:300,
-  UZ:300, KZ:360,
-  AE:240, SA:180, QA:180, KW:180, BH:180,
-  OM:240, IL:120, JO:180, TR:180, IR:210,
-  GB:0, PT:0, IE:0, IS:0,
-  FR:60, DE:60, IT:60, ES:60, NL:60, BE:60,
-  CH:60, AT:60, PL:60, CZ:60, HU:60,
-  HR:60, SE:60, NO:60, DK:60,
-  FI:120, EE:120, LV:120, LT:120,
-  GR:120, RO:120, BG:120, UA:120,
-  RU_MOW:180, RU_EKA:300, RU_KRA:420, RU_IRK:480, RU_VLA:600,
-  EG:120, ZA:120, KE:180, ET:180, NG:60, GH:0, MA:60, TN:60, TZ:180,
-  US_ET:-300, US_ET_NY:-300, US_ET_FL:-300, US_ET_MA:-300, US_ET_GA:-300,
-  US_ET_PA:-300, US_ET_OH:-300, US_ET_NC:-300, US_ET_VA:-300, US_ET_NJ:-300,
-  US_ET_MI:-300, US_ET_TN:-300, US_ET_SC:-300, US_ET_MD:-300,
-  US_ET_CT:-300, US_ET_DC:-300,
-  US_CT:-360, US_CT_IL:-360, US_CT_TX:-360, US_CT_MN:-360, US_CT_MO:-360,
-  US_CT_WI:-360, US_CT_LA:-360, US_CT_IA:-360, US_CT_OK:-360,
-  US_CT_AR:-360, US_CT_MS:-360, US_CT_KS:-360,
-  US_MT:-420, US_MT_CO:-420, US_MT_AZ:-420, US_MT_UT:-420, US_MT_NM:-420,
-  US_MT_MT:-420, US_MT_WY:-420, US_MT_ID:-420, US_MT_NV_LV:-480,
-  US_PT:-480, US_PT_CA:-480, US_PT_WA:-480, US_PT_OR:-480,
-  US_AK:-540, US_HI:-600,
-  CA_ET:-300, CA_CT:-360, CA_MT:-420, CA_PT:-480,
+  KR:900,JP:900,CN:480,TW:480,HK:480,
+  TH:420,VN:420,SG:480,MY:480,PH:480,
+  ID:420,ID_E:480,ID_EE:540,
+  KH:420,MM:390,LA:420,MN:480,
+  IN:330,LK:330,BD:360,NP:345,PK:300,
+  UZ:300,KZ:360,
+  AE:240,SA:180,QA:180,KW:180,BH:180,
+  OM:240,IL:120,JO:180,TR:180,IR:210,
+  GB:0,PT:0,IE:0,IS:0,
+  FR:60,DE:60,IT:60,ES:60,NL:60,BE:60,
+  CH:60,AT:60,PL:60,CZ:60,HU:60,
+  HR:60,SE:60,NO:60,DK:60,
+  FI:120,EE:120,LV:120,LT:120,
+  GR:120,RO:120,BG:120,UA:120,
+  RU_MOW:180,RU_EKA:300,RU_KRA:420,RU_IRK:480,RU_VLA:600,
+  EG:120,ZA:120,KE:180,ET:180,NG:60,GH:0,MA:60,TN:60,TZ:180,
+  US_ET:-300,US_ET_NY:-300,US_ET_FL:-300,US_ET_MA:-300,US_ET_GA:-300,
+  US_ET_PA:-300,US_ET_OH:-300,US_ET_NC:-300,US_ET_VA:-300,US_ET_NJ:-300,
+  US_ET_MI:-300,US_ET_TN:-300,US_ET_SC:-300,US_ET_MD:-300,
+  US_ET_CT:-300,US_ET_DC:-300,
+  US_CT:-360,US_CT_IL:-360,US_CT_TX:-360,US_CT_MN:-360,US_CT_MO:-360,
+  US_CT_WI:-360,US_CT_LA:-360,US_CT_IA:-360,US_CT_OK:-360,
+  US_CT_AR:-360,US_CT_MS:-360,US_CT_KS:-360,
+  US_MT:-420,US_MT_CO:-420,US_MT_AZ:-420,US_MT_UT:-420,US_MT_NM:-420,
+  US_MT_MT:-420,US_MT_WY:-420,US_MT_ID:-420,US_MT_NV_LV:-480,
+  US_PT:-480,US_PT_CA:-480,US_PT_WA:-480,US_PT_OR:-480,
+  US_AK:-540,US_HI:-600,
+  CA_ET:-300,CA_CT:-360,CA_MT:-420,CA_PT:-480,
   MX:-360,
-  BR_E:-180, BR_W:-240, AR:-180, CL:-240, CO:-300, PE:-300,
-  EC:-300, VE:-240, BO:-240, UY:-180, PA:-300, CR:-360, CU:-300,
-  AU_SYD:600, AU_BRI:600, AU_ADL:570, AU_PER:480, AU_DAR:570,
-  NZ:720, FJ:720, GU:600, PG:600
+  BR_E:-180,BR_W:-240,AR:-180,CL:-240,CO:-300,PE:-300,
+  EC:-300,VE:-240,BO:-240,UY:-180,PA:-300,CR:-360,CU:-300,
+  AU_SYD:600,AU_BRI:600,AU_ADL:570,AU_PER:480,AU_DAR:570,
+  NZ:720,FJ:720,GU:600,PG:600
 };
 
 var COUNTRY_NAMES = {
-  KR:'대한민국', JP:'일본', CN:'중국', TW:'대만', HK:'홍콩',
-  TH:'태국', VN:'베트남', SG:'싱가포르', MY:'말레이시아', PH:'필리핀',
-  ID:'인도네시아(자카르타)', ID_E:'인도네시아(발리)', ID_EE:'인도네시아(자야푸라)',
-  KH:'캄보디아', MM:'미얀마', LA:'라오스', MN:'몽골',
-  IN:'인도', LK:'스리랑카', BD:'방글라데시', NP:'네팔', PK:'파키스탄',
-  UZ:'우즈베키스탄', KZ:'카자흐스탄',
-  AE:'UAE', SA:'사우디아라비아', QA:'카타르', KW:'쿠웨이트', BH:'바레인',
-  OM:'오만', IL:'이스라엘', JO:'요르단', TR:'터키', IR:'이란',
-  GB:'영국', PT:'포르투갈', IE:'아일랜드', IS:'아이슬란드',
-  FR:'프랑스', DE:'독일', IT:'이탈리아', ES:'스페인', NL:'네덜란드',
-  BE:'벨기에', CH:'스위스', AT:'오스트리아', PL:'폴란드', CZ:'체코',
-  HU:'헝가리', HR:'크로아티아', SE:'스웨덴', NO:'노르웨이', DK:'덴마크',
-  FI:'핀란드', EE:'에스토니아', LV:'라트비아', LT:'리투아니아',
-  GR:'그리스', RO:'루마니아', BG:'불가리아', UA:'우크라이나',
-  RU_MOW:'러시아(모스크바)', RU_EKA:'러시아(예카테린부르크)',
-  RU_KRA:'러시아(크라스노야르스크)', RU_IRK:'러시아(이르쿠츠크)',
-  RU_VLA:'러시아(블라디보스토크)',
-  EG:'이집트', ZA:'남아공', KE:'케냐', ET:'에티오피아',
-  NG:'나이지리아', GH:'가나', MA:'모로코', TN:'튀니지', TZ:'탄자니아',
-  US_ET_NY:'미국 뉴욕', US_ET_FL:'미국 플로리다', US_ET_MA:'미국 보스턴',
-  US_ET_GA:'미국 애틀랜타', US_ET_PA:'미국 필라델피아',
-  US_ET_OH:'미국 오하이오', US_ET_NC:'미국 노스캐롤라이나',
-  US_ET_VA:'미국 버지니아', US_ET_NJ:'미국 뉴저지',
-  US_ET_MI:'미국 미시간', US_ET_TN:'미국 테네시',
-  US_ET_SC:'미국 사우스캐롤라이나', US_ET_MD:'미국 메릴랜드',
-  US_ET_CT:'미국 코네티컷', US_ET_DC:'미국 워싱턴 D.C.',
-  US_CT_IL:'미국 시카고', US_CT_TX:'미국 텍사스',
-  US_CT_MN:'미국 미네소타', US_CT_MO:'미국 미주리',
-  US_CT_WI:'미국 위스콘신', US_CT_LA:'미국 루이지애나',
-  US_CT_IA:'미국 아이오와', US_CT_OK:'미국 오클라호마',
-  US_CT_AR:'미국 아칸소', US_CT_MS:'미국 미시시피', US_CT_KS:'미국 캔자스',
-  US_MT_CO:'미국 덴버', US_MT_AZ:'미국 피닉스', US_MT_UT:'미국 솔트레이크시티',
-  US_MT_NM:'미국 앨버커키', US_MT_MT:'미국 몬태나', US_MT_WY:'미국 와이오밍',
-  US_MT_ID:'미국 아이다호', US_MT_NV_LV:'미국 라스베이거스',
-  US_PT_CA:'미국 로스앤젤레스', US_PT_WA:'미국 시애틀', US_PT_OR:'미국 포틀랜드',
-  US_AK:'미국 알래스카', US_HI:'미국 하와이',
-  CA_ET:'캐나다 토론토', CA_CT:'캐나다 위니펙',
-  CA_MT:'캐나다 캘거리', CA_PT:'캐나다 밴쿠버',
-  MX:'멕시코', BR_E:'브라질 상파울루', BR_W:'브라질 마나우스',
-  AR:'아르헨티나', CL:'칠레', CO:'콜롬비아', PE:'페루',
-  EC:'에콰도르', VE:'베네수엘라', BO:'볼리비아', UY:'우루과이',
-  PA:'파나마', CR:'코스타리카', CU:'쿠바',
-  AU_SYD:'호주 시드니', AU_BRI:'호주 브리즈번',
-  AU_ADL:'호주 애들레이드', AU_PER:'호주 퍼스', AU_DAR:'호주 다윈',
-  NZ:'뉴질랜드', FJ:'피지', GU:'괌', PG:'파푸아뉴기니'
+  KR:"대한민국",JP:"일본",CN:"중국",TW:"대만",HK:"홍콩",
+  TH:"태국",VN:"베트남",SG:"싱가포르",MY:"말레이시아",PH:"필리핀",
+  ID:"인도네시아(자카르타)",ID_E:"인도네시아(발리)",ID_EE:"인도네시아(자야푸라)",
+  KH:"캄보디아",MM:"미얀마",LA:"라오스",MN:"몽골",
+  IN:"인도",LK:"스리랑카",BD:"방글라데시",NP:"네팔",PK:"파키스탄",
+  UZ:"우즈베키스탄",KZ:"카자흐스탄",
+  AE:"UAE",SA:"사우디아라비아",QA:"카타르",KW:"쿠웨이트",BH:"바레인",
+  OM:"오만",IL:"이스라엘",JO:"요르단",TR:"터키",IR:"이란",
+  GB:"영국",PT:"포르투갈",IE:"아일랜드",IS:"아이슬란드",
+  FR:"프랑스",DE:"독일",IT:"이탈리아",ES:"스페인",NL:"네덜란드",
+  BE:"벨기에",CH:"스위스",AT:"오스트리아",PL:"폴란드",CZ:"체코",
+  HU:"헝가리",HR:"크로아티아",SE:"스웨덴",NO:"노르웨이",DK:"덴마크",
+  FI:"핀란드",EE:"에스토니아",LV:"라트비아",LT:"리투아니아",
+  GR:"그리스",RO:"루마니아",BG:"불가리아",UA:"우크라이나",
+  RU_MOW:"러시아(모스크바)",RU_EKA:"러시아(예카테린부르크)",
+  RU_KRA:"러시아(크라스노야르스크)",RU_IRK:"러시아(이르쿠츠크)",
+  RU_VLA:"러시아(블라디보스토크)",
+  EG:"이집트",ZA:"남아공",KE:"케냐",ET:"에티오피아",
+  NG:"나이지리아",GH:"가나",MA:"모로코",TN:"튀니지",TZ:"탄자니아",
+  US_ET_NY:"미국 뉴욕",US_ET_FL:"미국 플로리다",US_ET_MA:"미국 보스턴",
+  US_ET_GA:"미국 애틀랜타",US_ET_PA:"미국 필라델피아",
+  US_ET_OH:"미국 오하이오",US_ET_NC:"미국 노스캐롤라이나",
+  US_ET_VA:"미국 버지니아",US_ET_NJ:"미국 뉴저지",
+  US_ET_MI:"미국 미시간",US_ET_TN:"미국 테네시",
+  US_ET_SC:"미국 사우스캐롤라이나",US_ET_MD:"미국 메릴랜드",
+  US_ET_CT:"미국 코네티컷",US_ET_DC:"미국 워싱턴 D.C.",
+  US_CT_IL:"미국 시카고",US_CT_TX:"미국 텍사스",
+  US_CT_MN:"미국 미네소타",US_CT_MO:"미국 미주리",
+  US_CT_WI:"미국 위스콘신",US_CT_LA:"미국 루이지애나",
+  US_CT_IA:"미국 아이오와",US_CT_OK:"미국 오클라호마",
+  US_CT_AR:"미국 아칸소",US_CT_MS:"미국 미시시피",US_CT_KS:"미국 캔자스",
+  US_MT_CO:"미국 덴버",US_MT_AZ:"미국 피닉스",US_MT_UT:"미국 솔트레이크시티",
+  US_MT_NM:"미국 앨버커키",US_MT_MT:"미국 몬태나",US_MT_WY:"미국 와이오밍",
+  US_MT_ID:"미국 아이다호",US_MT_NV_LV:"미국 라스베이거스",
+  US_PT_CA:"미국 로스앤젤레스",US_PT_WA:"미국 시애틀",US_PT_OR:"미국 포틀랜드",
+  US_AK:"미국 알래스카",US_HI:"미국 하와이",
+  CA_ET:"캐나다 토론토",CA_CT:"캐나다 위니펙",
+  CA_MT:"캐나다 캘거리",CA_PT:"캐나다 밴쿠버",
+  MX:"멕시코",BR_E:"브라질 상파울루",BR_W:"브라질 마나우스",
+  AR:"아르헨티나",CL:"칠레",CO:"콜롬비아",PE:"페루",
+  EC:"에콰도르",VE:"베네수엘라",BO:"볼리비아",UY:"우루과이",
+  PA:"파나마",CR:"코스타리카",CU:"쿠바",
+  AU_SYD:"호주 시드니",AU_BRI:"호주 브리즈번",
+  AU_ADL:"호주 애들레이드",AU_PER:"호주 퍼스",AU_DAR:"호주 다윈",
+  NZ:"뉴질랜드",FJ:"피지",GU:"괌",PG:"파푸아뉴기니"
 };
 
 var CHRONO_DEFAULTS = {
-  'extreme-morning': { bed:'21:00', wake:'05:00' },
-  'morning':         { bed:'22:30', wake:'06:30' },
-  'neutral':         { bed:'23:30', wake:'07:30' },
-  'evening':         { bed:'01:00', wake:'09:00' }
+  "extreme-morning": {bed:"21:00",wake:"05:00"},
+  "morning":         {bed:"22:30",wake:"06:30"},
+  "neutral":         {bed:"23:30",wake:"07:30"},
+  "evening":         {bed:"01:00",wake:"09:00"}
 };
 
-var selectedChrono = 'neutral';
 var lastData = null;
-var currentDay = 1;
 
-/* ═══════════════════════════════════════
-   INIT – DOM 완전 로드 후 이벤트 연결
-═══════════════════════════════════════ */
-document.addEventListener('DOMContentLoaded', function() {
-
-  /* 크로노타입 버튼 */
-  document.querySelectorAll('.chrono-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var type = btn.getAttribute('data-type');
-      document.querySelectorAll('.chrono-btn').forEach(function(b) {
-        b.classList.remove('selected');
-      });
-      btn.classList.add('selected');
-      selectedChrono = type;
-      var d = CHRONO_DEFAULTS[type];
-      if(d) {
-        document.getElementById('sleep-bed').value  = d.bed;
-        document.getElementById('sleep-wake').value = d.wake;
-      }
-    });
-  });
-
-  /* 시간 직접 수정 시 크로노타입 해제 */
-  document.getElementById('sleep-bed').addEventListener('change', function() {
-    document.querySelectorAll('.chrono-btn').forEach(function(b) { b.classList.remove('selected'); });
-    selectedChrono = 'custom';
-  });
-  document.getElementById('sleep-wake').addEventListener('change', function() {
-    document.querySelectorAll('.chrono-btn').forEach(function(b) { b.classList.remove('selected'); });
-    selectedChrono = 'custom';
-  });
-
-  /* Step 이동 버튼 */
-  document.getElementById('btn-to-step2').addEventListener('click', goToStep2);
-  document.getElementById('btn-back-step1').addEventListener('click', goToStep1);
-  document.getElementById('btn-calc').addEventListener('click', function() {
-    calculate();
-    goToStep3();
-  });
-  document.getElementById('btn-save-img').addEventListener('click', saveAsImage);
-  document.getElementById('btn-reset').addEventListener('click', resetAll);
-
-  /* 오늘 날짜 기본값 */
-  var today = new Date();
-  var fmt = function(d) { return d.toISOString().split('T')[0]; };
-  document.getElementById('takeoff-date').value = fmt(today);
-  var tom = new Date(today);
-  tom.setDate(tom.getDate() + 1);
-  document.getElementById('landing-date').value = fmt(tom);
-});
-
-/* ═══════════════════════════════════════
-   UTILITIES
-═══════════════════════════════════════ */
+/* ═══════════════════════════════
+   UTILS
+═══════════════════════════════ */
 function timeToMins(t) {
-  var parts = t.split(':');
-  return parseInt(parts[0] * 0 + parseInt(parts[1]);
+  var p = t.split(":");
+  return parseInt(p[0] * 0 + parseInt(p[1]);
 }
 function minsToTime(m) {
   m = ((m % 1440) + 1440) % 1440;
-  var h = Math.floor(m / 60);
-  var mm = m % 60;
-  return ('0' + h).slice(-2) + ':' + ('0' + mm).slice(-2);
+  var h = Math.floor(m / 60), mm = m % 60;
+  return ("0"+h).slice(-2) + ":" + ("0"+mm).slice(-2);
 }
 function offsetStr(mins) {
-  if (mins === 0) return 'UTC+0';
-  var sign = mins > 0 ? '+' : '-';
+  if (mins === 0) return "UTC+0";
+  var sign = mins > 0 ? "+" : "-";
   var abs = Math.abs(mins);
-  var h = Math.floor(abs / 60);
-  var m = abs % 60;
-  return 'UTC' + sign + h + (m ? ':' + ('0' + m).slice(-2) : '');
+  var h = Math.floor(abs/60), m = abs%60;
+  return "UTC" + sign + h + (m ? ":" + ("0"+m).slice(-2) : "");
 }
 function diffLabel(diff) {
   var abs = Math.abs(diff);
-  var h = Math.floor(abs / 60);
-  var m = abs % 60;
-  return (diff >= 0 ? '+' : '-') + h + '시간' + (m ? ' ' + m + '분' : '');
+  var h = Math.floor(abs/60), m = abs%60;
+  return (diff >= 0 ? "+" : "-") + h + "시간" + (m ? " " + m + "분" : "");
 }
 function showToast(msg) {
-  var t = document.getElementById('toast');
+  var t = document.getElementById("toast");
   t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(function() { t.classList.remove('show'); }, 2800);
+  t.classList.add("show");
+  setTimeout(function(){ t.classList.remove("show"); }, 2800);
 }
-function showEl(id) { document.getElementById(id).classList.remove('hidden'); }
-function hideEl(id) { document.getElementById(id).classList.add('hidden'); }
+function showEl(id){ document.getElementById(id).classList.remove("hidden"); }
+function hideEl(id){ document.getElementById(id).classList.add("hidden"); }
 
-/* ═══════════════════════════════════════
-   STEP NAVIGATION
-═══════════════════════════════════════ */
+/* ═══════════════════════════════
+   STEP NAV
+═══════════════════════════════ */
 function setStep(n) {
   for (var i = 1; i <= 3; i++) {
-    var el = document.getElementById('step-ind-' + i);
-    el.classList.remove('active', 'done');
-    if (i < n) el.classList.add('done');
-    if (i === n) el.classList.add('active');
+    var el = document.getElementById("step-ind-" + i);
+    el.classList.remove("active","done");
+    if (i < n) el.classList.add("done");
+    if (i === n) el.classList.add("active");
   }
 }
 function goToStep1() {
-  showEl('section-sleep');
-  hideEl('section-flight');
-  hideEl('section-result');
+  showEl("section-sleep"); hideEl("section-flight"); hideEl("section-result");
   setStep(1);
 }
 function goToStep2() {
-  hideEl('section-sleep');
-  showEl('section-flight');
-  hideEl('section-result');
+  hideEl("section-sleep"); showEl("section-flight"); hideEl("section-result");
   setStep(2);
 }
 function goToStep3() {
-  hideEl('section-sleep');
-  hideEl('section-flight');
-  showEl('section-result');
+  hideEl("section-sleep"); hideEl("section-flight"); showEl("section-result");
   setStep(3);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({top:0,behavior:"smooth"});
 }
 function resetAll() {
   goToStep1();
-  document.getElementById('result-area').innerHTML = '';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.getElementById("result-area").innerHTML = "";
+  window.scrollTo({top:0,behavior:"smooth"});
 }
 
-/* ═══════════════════════════════════════
-   CORE CALCULATION
-═══════════════════════════════════════ */
-function calculate() {
-  var originKey   = document.getElementById('origin-country').value;
-  var destKey     = document.getElementById('dest-country').value;
-  var takeoffDate = document.getElementById('takeoff-date').value;
-  var landingDate = document.getElementById('landing-date').value;
-  var takeoffTime = document.getElementById('takeoff-time').value;
-  var landingTime = document.getElementById('landing-time').value;
-  var bedTime     = document.getElementById('sleep-bed').value;
-  var wakeTime    = document.getElementById('sleep-wake').value;
+/* ═══════════════════════════════
+   INIT
+═══════════════════════════════ */
+document.addEventListener("DOMContentLoaded", function() {
+  /* 크로노타입 버튼 */
+  document.querySelectorAll(".chrono-btn").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      document.querySelectorAll(".chrono-btn").forEach(function(b){ b.classList.remove("selected"); });
+      btn.classList.add("selected");
+      var d = CHRONO_DEFAULTS[btn.getAttribute("data-type")];
+      if (d) {
+        document.getElementById("sleep-bed").value  = d.bed;
+        document.getElementById("sleep-wake").value = d.wake;
+      }
+    });
+  });
+  /* 수동 시간 변경 시 크로노타입 선택 해제 */
+  ["sleep-bed","sleep-wake"].forEach(function(id){
+    document.getElementById(id).addEventListener("change", function(){
+      document.querySelectorAll(".chrono-btn").forEach(function(b){ b.classList.remove("selected"); });
+    });
+  });
+  /* 버튼 이벤트 */
+  document.getElementById("btn-to-step2").addEventListener("click", goToStep2);
+  document.getElementById("btn-back-step1").addEventListener("click", goToStep1);
+  document.getElementById("btn-calc").addEventListener("click", function(){ calculate(); goToStep3(); });
+  document.getElementById("btn-save-img").addEventListener("click", saveAsImage);
+  document.getElementById("btn-reset").addEventListener("click", resetAll);
+  /* 날짜 기본값 */
+  var today = new Date();
+  var fmt = function(d){ return d.toISOString().split("T")[0]; };
+  document.getElementById("takeoff-date").value = fmt(today);
+  var tom = new Date(today); tom.setDate(tom.getDate()+1);
+  document.getElementById("landing-date").value = fmt(tom);
+});
 
-  if (!takeoffDate || !landingDate) return;
+/* ═══════════════════════════════
+   CALCULATE
+═══════════════════════════════ */
+function calculate() {
+  var originKey   = document.getElementById("origin-country").value;
+  var destKey     = document.getElementById("dest-country").value;
+  var takeoffDate = document.getElementById("takeoff-date").value;
+  var landingDate = document.getElementById("landing-date").value;
+  var takeoffTime = document.getElementById("takeoff-time").value;
+  var landingTime = document.getElementById("landing-time").value;
+  var bedTime     = document.getElementById("sleep-bed").value;
+  var wakeTime    = document.getElementById("sleep-wake").value;
 
   var originOffset = TZ[originKey] != null ? TZ[originKey] : 540;
   var destOffset   = TZ[destKey]   != null ? TZ[destKey]   : 0;
@@ -906,38 +1007,36 @@ function calculate() {
 
   var bedMins  = timeToMins(bedTime);
   var wakeMins = timeToMins(wakeTime);
-  var tmin     = ((wakeMins - 120) + 1440) % 1440;
 
   var direction, dirLabel, dirClass;
   if (tzDiff > 30) {
-    direction = 'east'; dirLabel = '동쪽 이동 (시간 앞당기기)'; dirClass = 'dir-east';
+    direction = "east"; dirLabel = "동쪽 이동 (시간 앞당기기)"; dirClass = "dir-east";
   } else if (tzDiff < -30) {
-    direction = 'west'; dirLabel = '서쪽 이동 (시간 늦추기)'; dirClass = 'dir-west';
+    direction = "west"; dirLabel = "서쪽 이동 (시간 늦추기)"; dirClass = "dir-west";
   } else {
-    direction = 'same'; dirLabel = '시차 거의 없음'; dirClass = 'dir-same';
+    direction = "same"; dirLabel = "시차 거의 없음"; dirClass = "dir-same";
   }
 
-  var daysToAdapt = direction === 'east'
+  var daysToAdapt = direction === "east"
     ? Math.ceil(crossedZone * .5)
-    : direction === 'west'
+    : direction === "west"
     ? Math.ceil(crossedZone * .0)
     : 0;
 
   var days = [];
   for (var day = 0; day < 5; day++) {
     var progress = daysToAdapt > 0 ? Math.min(day / daysToAdapt, 1) : 1;
-
     var shiftedBed  = ((bedMins  + tzDif * rogress) % 1440 + 1440) % 1440;
     var shiftedWake = ((wakeMins + tzDif * rogress) % 1440 + 1440) % 1440;
     var tminLocal   = ((shiftedWake - 120) + 1440) % 1440;
 
     var lightStart, lightEnd, avoidStart, avoidEnd;
-    if (direction === 'east') {
+    if (direction === "east") {
       lightStart = (tminLocal + 60  + 1440) % 1440;
       lightEnd   = (tminLocal + 180 + 1440) % 1440;
       avoidStart = (tminLocal - 180 + 1440) % 1440;
       avoidEnd   = tminLocal;
-    } else if (direction === 'west') {
+    } else if (direction === "west") {
       lightStart = (tminLocal - 240 + 1440) % 1440;
       lightEnd   = (tminLocal - 60  + 1440) % 1440;
       avoidStart = (tminLocal + 30  + 1440) % 1440;
@@ -945,7 +1044,7 @@ function calculate() {
     } else {
       lightStart = (shiftedWake + 60)  % 1440;
       lightEnd   = (shiftedWake + 180) % 1440;
-      avoidStart = (shiftedBed  - 90 + 1440) % 1440;
+      avoidStart = (shiftedBed - 90 + 1440) % 1440;
       avoidEnd   = shiftedBed;
     }
 
@@ -966,252 +1065,253 @@ function calculate() {
   }
 
   lastData = {
-    originKey: originKey, destKey: destKey,
-    originOffset: originOffset, destOffset: destOffset,
-    tzDiff: tzDiff, crossedZones: crossedZones,
-    direction: direction, dirLabel: dirLabel, dirClass: dirClass,
-    daysToAdapt: daysToAdapt,
-    bedMins: bedMins, wakeMins: wakeMins,
-    days: days,
-    takeoffDate: takeoffDate, landingDate: landingDate,
-    takeoffTime: takeoffTime, landingTime: landingTime
+    originKey:originKey, destKey:destKey,
+    originOffset:originOffset, destOffset:destOffset,
+    tzDiff:tzDiff, crossedZones:crossedZones,
+    direction:direction, dirLabel:dirLabel, dirClass:dirClass,
+    daysToAdapt:daysToAdapt, bedMins:bedMins, wakeMins:wakeMins,
+    days:days,
+    takeoffDate:takeoffDate, landingDate:landingDate,
+    takeoffTime:takeoffTime, landingTime:landingTime
   };
-
   renderResult(lastData);
 }
 
-/* ═══════════════════════════════════════
-   RENDER RESULT
-═══════════════════════════════════════ */
+/* ═══════════════════════════════
+   RENDER
+═══════════════════════════════ */
 function renderResult(data) {
-  var area = document.getElementById('result-area');
-  var originName = COUNTRY_NAMES[data.originKey] || data.originKey;
-  var destName   = COUNTRY_NAMES[data.destKey]   || data.destKey;
+  var area = document.getElementById("result-area");
+  var oName = COUNTRY_NAMES[data.originKey] || data.originKey;
+  var dName = COUNTRY_NAMES[data.destKey]   || data.destKey;
+  var dirArrow = data.direction === "east" ? "→ 동쪽"
+               : data.direction === "west" ? "← 서쪽" : "≈ 동일";
 
-  var dirArrow = data.direction === 'east' ? '→ 동쪽' : data.direction === 'west' ? '← 서쪽' : '≈ 동일';
-
-  var html = '<div class="card">'
-    + '<div class="card-header">'
-    + '<div class="card-icon ci-result">🗺️</div>'
-    + '<div>'
-    + '<div class="card-title">시차적응 플랜 생성 완료</div>'
-    + '<div class="card-sub">' + originName + ' → ' + destName + '</div>'
-    + '</div></div>'
-    + '<div class="info-row">'
-    + '<span class="badge badge-purple">✈️ ' + originName + ' → ' + destName + '</span>'
-    + '<span class="dir-badge ' + data.dirClass + '">' + dirArrow + ' ' + data.dirLabel + '</span>'
-    + '</div>'
-    + '<div class="summary-box"><h3>📋 개요</h3><div class="summary-kv">'
-    + '<div><dt>출발지 시간대</dt><dd>' + offsetStr(data.originOffset) + '</dd></div>'
-    + '<div><dt>도착지 시간대</dt><dd>' + offsetStr(data.destOffset) + '</dd></div>'
-    + '<div><dt>시차</dt><dd>' + diffLabel(data.tzDiff) + '</dd></div>'
-    + '<div><dt>통과 시간대</dt><dd>' + data.crossedZones + '개</dd></div>'
-    + '<div><dt>완전 적응 예상</dt><dd>' + (data.daysToAdapt > 0 ? data.daysToAdapt + '일' : '적응 불필요') + '</dd></div>'
-    + '<div><dt>이착륙</dt><dd>' + data.takeoffDate + ' ' + data.takeoffTime + ' → ' + data.landingDate + ' ' + data.landingTime + '</dd></div>'
-    + '</div></div>';
+  /* ── 개요 카드 ── */
+  var html = "<div class=\"card\">"
+    + "<div class=\"card-header\">"
+    + "<div class=\"card-icon ci-result\">🗺️</div>"
+    + "<div><div class=\"card-title\">시차적응 플랜 생성 완료</div>"
+    + "<div class=\"card-sub\">" + oName + " → " + dName + "</div></div></div>"
+    + "<div class=\"info-row\">"
+    + "<span class=\"badge badge-amber\">✈️ " + oName + " → " + dName + "</span>"
+    + "<span class=\"dir-badge " + data.dirClass + "\">" + dirArrow + " " + data.dirLabel + "</span>"
+    + "</div>"
+    + "<div class=\"summary-box\"><h3>📋 개요</h3><div class=\"summary-kv\">"
+    + "<div><dt>출발지 시간대</dt><dd>" + offsetStr(data.originOffset) + "</dd></div>"
+    + "<div><dt>도착지 시간대</dt><dd>" + offsetStr(data.destOffset) + "</dd></div>"
+    + "<div><dt>시차</dt><dd>" + diffLabel(data.tzDiff) + "</dd></div>"
+    + "<div><dt>통과 시간대</dt><dd>" + data.crossedZones + "개</dd></div>"
+    + "<div><dt>완전 적응 예상</dt><dd>" + (data.daysToAdapt > 0 ? data.daysToAdapt + "일" : "적응 불필요") + "</dd></div>"
+    + "<div><dt>이착륙</dt><dd>" + data.takeoffDate + " " + data.takeoffTime + " → " + data.landingDate + " " + data.landingTime + "</dd></div>"
+    + "</div></div>";
 
   if (data.crossedZones < 2) {
-    html += '<div class="alert alert-info">ℹ️ 시차가 2시간 미만이라 1~2일 내 자연 적응됩니다.</div>';
+    html += "<div class=\"alert alert-info\">ℹ️ 시차가 2시간 미만이라 1~2일 내 자연 적응됩니다.</div>";
   }
   if (data.crossedZones >= 8) {
-    html += '<div class="alert alert-warn">⚠️ 시차가 ' + data.crossedZones + '시간으로 매우 큽니다. 아래 플랜을 꼼꼼히 따르면 적응 기간을 단축할 수 있습니다.</div>';
+    html += "<div class=\"alert alert-warn\">⚠️ 시차가 " + data.crossedZones + "시간으로 매우 큽니다. 아래 플랜을 꼼꼼히 따르면 적응 기간을 단축할 수 있습니다.</div>";
   }
-  html += '</div>';
+  html += "</div>";
 
-  /* Day Tabs */
-  html += '<div class="card"><div class="card-header">'
-    + '<div class="card-icon ci-result">📅</div>'
-    + '<div><div class="card-title">도착지 현지 기준 일별 스케줄</div>'
-    + '<div class="card-sub">모든 시간은 <strong>도착지 현지 시간</strong> 기준입니다</div>'
-    + '</div></div>'
-    + '<div class="day-tabs" id="day-tabs">';
+  /* ── 일별 탭 카드 ── */
+  html += "<div class=\"card\"><div class=\"card-header\">"
+    + "<div class=\"card-icon ci-result\">📅</div>"
+    + "<div><div class=\"card-title\">도착지 현지 기준 일별 스케줄</div>"
+    + "<div class=\"card-sub\">모든 시간은 <strong>도착지 현지 시간</strong> 기준입니다</div></div></div>"
+    + "<div class=\"day-tabs\" id=\"day-tabs\">";
 
   for (var i = 0; i < data.days.length; i++) {
     var d = data.days[i];
-    html += '<button class="day-tab' + (i === 0 ? ' active' : '') + '" data-day="' + d.day + '">'
-      + d.day + '일차' + (d.adapted ? ' ✅' : '') + '</button>';
+    html += "<button class=\"day-tab" + (i === 0 ? " active" : "") + "\" data-day=\"" + d.day + "\">"
+      + d.day + "일차" + (d.adapted ? " ✅" : "") + "</button>";
   }
-  html += '</div>';
+  html += "</div>";
 
   for (var j = 0; j < data.days.length; j++) {
     var dd = data.days[j];
-    html += '<div id="day-content-' + dd.day + '" class="' + (j !== 0 ? 'hidden' : '') + '">';
+    html += "<div id=\"day-content-" + dd.day + "\"" + (j !== 0 ? " class=\"hidden\"" : "") + ">";
     html += renderDay(dd, data);
-    html += '</div>';
+    html += "</div>";
   }
-  html += '</div>';
+  html += "</div>";
 
-  /* Tips */
-  html += '<div class="card"><div class="card-header">'
-    + '<div class="card-icon ci-result">💡</div>'
-    + '<div><div class="card-title">시차적응 팁</div>'
-    + '<div class="card-sub">과학적으로 검증된 추가 방법</div>'
-    + '</div></div><div class="tips-grid">'
-    + '<div class="tip-card"><div class="tip-head">💊 멜라토닌</div>'
-    + '<p>' + (data.direction === 'east'
-        ? '도착지 현지 저녁(취침 30분 전) 0.5~3mg 복용 시 수면 유도에 효과적입니다.'
-        : '현지 오후~저녁에 소량 복용하면 시계 조정에 도움이 됩니다.') + '</p></div>'
-    + '<div class="tip-card"><div class="tip-head">☕ 카페인</div>'
-    + '<p>졸릴 때 카페인을 전략적으로 활용하되, 현지 기준 오후 2시 이후에는 삼가세요.</p></div>'
-    + '<div class="tip-card"><div class="tip-head">🍽️ 식사 시간</div>'
-    + '<p>도착 즉시 현지 식사 시간에 맞춰 식사하면 생체시계 재설정을 도와줍니다.</p></div>'
-    + '<div class="tip-card"><div class="tip-head">🏃 운동</div>'
-    + '<p>' + (data.direction === 'east'
-        ? '현지 오전 운동은 각성과 위상 전진을 동시에 도와줍니다.'
-        : '현지 오후~저녁 가벼운 유산소 운동이 생체시계 지연에 효과적입니다.') + '</p></div>'
-    + '</div></div>';
+  /* ── 팁 카드 ── */
+  var eastWest = data.direction === "east";
+  html += "<div class=\"card\"><div class=\"card-header\">"
+    + "<div class=\"card-icon ci-result\">💡</div>"
+    + "<div><div class=\"card-title\">시차적응 팁</div>"
+    + "<div class=\"card-sub\">수면 과학 기반 추가 방법</div></div></div>"
+    + "<div class=\"tips-grid\">"
+    + "<div class=\"tip-card\"><div class=\"tip-head\">💊 멜라토닌</div>"
+    + "<p>" + (eastWest
+        ? "도착지 현지 저녁(취침 30분 전) 0.5~3mg 복용 시 수면 유도에 효과적입니다."
+        : "현지 오후~저녁에 소량 복용하면 시계 조정에 도움이 됩니다.") + "</p></div>"
+    + "<div class=\"tip-card\"><div class=\"tip-head\">🌅 아침 청색광</div>"
+    + "<p>기상 직후 밝은 햇빛 또는 청색광 램프(10,000lux) 20~30분 노출은 위상 전진에 효과적입니다.</p></div>"
+    + "<div class=\"tip-card\"><div class=\"tip-head\">🍽️ 식사 시간</div>"
+    + "<p>도착 즉시 현지 식사 시간에 맞춰 식사하면 생체시계 재설정을 도와줍니다.</p></div>"
+    + "<div class=\"tip-card\"><div class=\"tip-head\">🕶️ 앰버 선글라스</div>"
+    + "<p>저녁 빛 차단 구간에 앰버 렌즈 착용 시 멜라토닌 분비가 증가하여 수면 질이 향상됩니다.</p></div>"
+    + "</div></div>";
 
   area.innerHTML = html;
 
-  /* Day Tab 이벤트 – innerHTML 후 재연결 */
-  document.querySelectorAll('.day-tab').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var day = parseInt(btn.getAttribute('data-day'));
-      switchDay(day);
+  /* 탭 이벤트 재연결 */
+  document.querySelectorAll(".day-tab").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      switchDay(parseInt(btn.getAttribute("data-day")));
     });
   });
 }
 
+/* ── 하루 스케줄 렌더 ── */
 function renderDay(d, data) {
-  var html = '<div style="margin-bottom:14px;">';
+  var html = "<div style=\"margin-bottom:14px;\">";
   if (d.progress >= 100) {
-    html += '<span class="badge badge-green">✅ 이날부터 완전 적응!</span>';
+    html += "<span class=\"badge badge-green\">✅ 이날부터 완전 적응!</span>";
   } else {
-    html += '<span class="badge badge-purple">적응 진행률: ' + d.progress + '%</span>';
+    html += "<span class=\"badge badge-amber\">적응 진행률: " + d.progress + "%</span>";
   }
-  html += '<div style="font-size:12px;color:var(--text-muted);margin-top:8px;">'
-    + '체내 시계 최저점(Tmin): <strong>' + minsToTime(d.tmin) + '</strong>'
-    + '</div></div>';
+  html += "<div style=\"font-size:12px;color:var(--text-muted);margin-top:8px;\">"
+    + "체내 시계 최저점(Tmin): <strong>" + minsToTime(d.tmin) + "</strong>"
+    + "</div></div>";
 
-  html += '<div class="schedule-list">'
-    + schedItem('sched-sun',     '☀️', 'sun-color',      '밝은 빛 적극 노출',    minsToTime(d.lightStart) + ' ~ ' + minsToTime(d.lightEnd),    '야외 산책 또는 밝은 실내 조명 (1,000 lux 이상 권장)')
-    + schedItem('sched-sunglass','🕶️','sunglass-color', '선글라스 착용 / 빛 차단', minsToTime(d.sunglassStart) + ' ~ ' + minsToTime(d.sunglassEnd), '이 시간 빛 노출 시 생체시계가 반대 방향으로 틀어질 수 있음')
-    + schedItem('sched-sleep',   '😴', 'sleep-color',    '취침 권장 시간',       minsToTime(d.sleepStart),                                    '침실은 최대한 어둡게 유지하세요')
-    + schedItem('sched-awake',   '⏰', 'awake-color',    '기상 권장 시간',       minsToTime(d.sleepEnd),                                      '기상 즉시 커튼을 열고 햇빛을 받으세요')
-    + schedItem('sched-dark',    '🌙', 'dark-color',     '저녁 빛 감소 구간',    minsToTime(d.avoidStart) + ' ~ ' + minsToTime(d.avoidEnd),    '스마트폰 블루라이트 차단, 조명 어둡게 조절')
-    + '</div>';
+  /* ── schedItem 호출: 문자열 연결만 사용, 아포스트로피 없음 ── */
+  html += "<div class=\"schedule-list\">"
+    + schedItem("sched-morning",  "☀️",  "morning-color",
+        "밝은 빛 적극 노출",
+        minsToTime(d.lightStart) + " ~ " + minsToTime(d.lightEnd),
+        "야외 산책 또는 청색광 램프 (1,000 lux 이상 권장)")
+    + schedItem("sched-sunglass", "🕶️", "sunglass-color",
+        "선글라스 착용 / 빛 차단",
+        minsToTime(d.sunglassStart) + " ~ " + minsToTime(d.sunglassEnd),
+        "이 시간 빛 노출 시 생체시계가 반대 방향으로 틀어질 수 있음")
+    + schedItem("sched-sleep",    "😴",  "sleep-color",
+        "취침 권장 시간",
+        minsToTime(d.sleepStart),
+        "침실은 최대한 어둡게 유지하고 앰버 조명만 허용")
+    + schedItem("sched-awake",    "⏰",  "awake-color",
+        "기상 권장 시간",
+        minsToTime(d.sleepEnd),
+        "기상 즉시 커튼을 열고 햇빛을 받으세요")
+    + schedItem("sched-amber",    "🌇",  "amber-color",
+        "저녁 빛 감소 구간",
+        minsToTime(d.avoidStart) + " ~ " + minsToTime(d.avoidEnd),
+        "스마트폰 블루라이트 차단, 앰버 조명으로 전환")
+    + "</div>";
 
-  /* Timeline */
-  html += '<div style="margin-top:18px;">'
-    + '<div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:8px;">⏱️ 24시간 타임라인 (도착지 현지)</div>'
-    + '<div class="timeline-wrapper"><div class="timeline-container">'
-    + '<div class="tl-hours">';
-
+  /* ── 타임라인 ── */
+  html += "<div style=\"margin-top:18px;\">"
+    + "<div style=\"font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:8px;\">⏱️ 24시간 타임라인 (도착지 현지)</div>"
+    + "<div class=\"timeline-wrapper\"><div class=\"timeline-container\">"
+    + "<div class=\"tl-hours\">";
   for (var h = 0; h < 24; h += 2) {
-    html += '<div class="tl-hour" style="flex:2;">' + ('0' + h).slice(-2) + '</div>';
+    html += "<div class=\"tl-hour\" style=\"flex:2;\">" + ("0"+h).slice(-2) + "</div>";
   }
-  html += '</div>';
-  html += buildTrack('😴 수면',     d.sleepStart,    d.sleepEnd,    'tl-seg-sleep',    '😴 취침');
-  html += buildTrack('☀️ 빛 노출',  d.lightStart,    d.lightEnd,    'tl-seg-sun',      '☀️ 빛');
-  html += buildTrack('🕶️ 선글라스', d.sunglassStart, d.sunglassEnd, 'tl-seg-sunglass', '🕶️');
-  html += '</div></div></div>';
+  html += "</div>";
+  html += buildTrack("😴 수면",      d.sleepStart,    d.sleepEnd,    "tl-seg-sleep",   "😴 취침");
+  html += buildTrack("☀️ 빛 노출",   d.lightStart,    d.lightEnd,    "tl-seg-morning", "☀️ 빛");
+  html += buildTrack("🕶️ 선글라스",  d.sunglassStart, d.sunglassEnd, "tl-seg-amber",   "🕶️");
+  html += "</div></div></div>";
 
   return html;
 }
 
+/* ── schedItem: 백틱/아포스트로피 없이 문자열 연결만 사용 ── */
 function schedItem(cls, icon, colorCls, title, time, desc) {
-  return '<div class="sched-item ' + cls + '">'
-    + '<div class="sched-icon">' + icon + '</div>'
-    + '<div class="sched-info">'
-    + '<div class="sched-title ' + colorCls + '">' + title + '</div>'
-    + '<div class="sched-time ' + colorCls + '">' + time + '</div>'
-    + '<div class="sched-desc">' + desc + '</div>'
-    + '</div>'
-    + '<div class="sched-day">도착지 현지</div>'
-    + '</div>';
+  return "<div class=\"sched-item " + cls + "\">"
+    + "<div class=\"sched-icon\">" + icon + "</div>"
+    + "<div class=\"sched-info\">"
+    + "<div class=\"sched-title " + colorCls + "\">" + title + "</div>"
+    + "<div class=\"sched-time " + colorCls + "\">" + time + "</div>"
+    + "<div class=\"sched-desc\">" + desc + "</div>"
+    + "</div>"
+    + "<div class=\"sched-day\">도착지 현지</div>"
+    + "</div>";
 }
 
+/* ── buildTrack ── */
 function buildTrack(label, start, end, cls, txt) {
   var s = ((start % 1440) + 1440) % 1440;
   var e = ((end   % 1440) + 1440) % 1440;
-  var segs = '';
+  var segs = "";
   if (s < e) {
-    var l = (e - s) / 144 * 00;
-    var p = s / 144 * 00;
-    segs = '<div class="tl-segment ' + cls + '" style="left:' + p.toFixed(2) + '%;width:' + l.toFixed(2) + '%;">'
-      + (l > 5 ? txt : '') + '</div>';
+    var l = (e - s) / 144 * 00, p = s / 144 * 00;
+    segs = "<div class=\"tl-segment " + cls + "\" style=\"left:" + p.toFixed(2) + "%;width:" + l.toFixed(2) + "%;\">"
+      + (l > 5 ? txt : "") + "</div>";
   } else {
-    var l1 = (1440 - s) / 144 * 00;
-    var l2 = e / 144 * 00;
-    segs = '<div class="tl-segment ' + cls + '" style="left:' + (s / 144 * 00).toFixed(2) + '%;width:' + l1.toFixed(2) + '%;">'
-      + (l1 > 5 ? txt : '') + '</div>';
+    var l1 = (1440 - s) / 144 * 00, l2 = e / 144 * 00;
+    segs = "<div class=\"tl-segment " + cls + "\" style=\"left:" + (s/1440*100).toFixed(2) + "%;width:" + l1.toFixed(2) + "%;\">"
+      + (l1 > 5 ? txt : "") + "</div>";
     if (l2 > 0) {
-      segs += '<div class="tl-segment ' + cls + '" style="left:0%;width:' + l2.toFixed(2) + '%;">'
-        + (l2 > 5 ? txt : '') + '</div>';
+      segs += "<div class=\"tl-segment " + cls + "\" style=\"left:0%;width:" + l2.toFixed(2) + "%;\">"
+        + (l2 > 5 ? txt : "") + "</div>";
     }
   }
-  return '<div class="tl-label">' + label + '</div>'
-    + '<div class="tl-track">' + segs + '</div>';
+  return "<div class=\"tl-label\">" + label + "</div>"
+    + "<div class=\"tl-track\">" + segs + "</div>";
 }
 
+/* ── switchDay ── */
 function switchDay(n) {
-  currentDay = n;
-  document.querySelectorAll('[id^="day-content-"]').forEach(function(el) {
-    el.classList.add('hidden');
+  document.querySelectorAll("[id^=\"day-content-\"]").forEach(function(el){
+    el.classList.add("hidden");
   });
-  document.querySelectorAll('.day-tab').forEach(function(el) {
-    el.classList.remove('active');
+  document.querySelectorAll(".day-tab").forEach(function(el){
+    el.classList.remove("active");
   });
-  var content = document.getElementById('day-content-' + n);
-  if (content) content.classList.remove('hidden');
-  document.querySelectorAll('.day-tab').forEach(function(btn) {
-    if (parseInt(btn.getAttribute('data-day')) === n) btn.classList.add('active');
+  var c = document.getElementById("day-content-" + n);
+  if (c) c.classList.remove("hidden");
+  document.querySelectorAll(".day-tab").forEach(function(btn){
+    if (parseInt(btn.getAttribute("data-day")) === n) btn.classList.add("active");
   });
 }
 
-/* ═══════════════════════════════════════
+/* ═══════════════════════════════
    IMAGE EXPORT
-═══════════════════════════════════════ */
+═══════════════════════════════ */
 function saveAsImage() {
-  if (!lastData) { showToast('먼저 플랜을 생성해주세요.'); return; }
+  if (!lastData) { showToast("먼저 플랜을 생성해주세요."); return; }
+  var oName = COUNTRY_NAMES[lastData.originKey] || lastData.originKey;
+  var dName = COUNTRY_NAMES[lastData.destKey]   || lastData.destKey;
 
-  var originName = COUNTRY_NAMES[lastData.originKey] || lastData.originKey;
-  var destName   = COUNTRY_NAMES[lastData.destKey]   || lastData.destKey;
+  document.getElementById("sc-subtitle").textContent =
+    oName + " → " + dName + " | " + lastData.takeoffDate + " 출발";
 
-  document.getElementById('sc-subtitle').textContent =
-    originName + ' → ' + destName + ' | ' + lastData.takeoffDate + ' 출발';
-
-  var bodyHtml = '<div style="font-size:13px;color:#e2e8f0;line-height:1.8;">';
+  var bodyHtml = "<div style=\"font-size:13px;color:#ede0d0;line-height:1.8;\">";
   lastData.days.forEach(function(d) {
-    bodyHtml += '<div style="margin-bottom:14px;padding:12px;background:#1c2035;border-radius:10px;border:1px solid #2a2f4a;">'
-      + '<div style="font-weight:700;font-size:14px;margin-bottom:8px;color:#a78bfa;">'
-      + d.day + '일차 (적응 진행률: ' + d.progress + '%)</div>'
-      + '<div>☀️ 빛 노출: <strong>' + minsToTime(d.lightStart) + ' ~ ' + minsToTime(d.lightEnd) + '</strong></div>'
-      + '<div>🕶️ 선글라스: <strong>' + minsToTime(d.sunglassStart) + ' ~ ' + minsToTime(d.sunglassEnd) + '</strong></div>'
-      + '<div>😴 취침: <strong>' + minsToTime(d.sleepStart) + '</strong></div>'
-      + '<div>⏰ 기상: <strong>' + minsToTime(d.sleepEnd) + '</strong></div>'
-      + '<div>🌙 빛 감소 시작: <strong>' + minsToTime(d.avoidStart) + '</strong></div>'
-      + '</div>';
+    bodyHtml += "<div style=\"margin-bottom:12px;padding:12px;background:#2a221a;border-radius:10px;border:1px solid #4a3d2e;\">"
+      + "<div style=\"font-weight:700;font-size:14px;margin-bottom:8px;color:#f5c89a;\">"
+      + d.day + "일차 (적응 진행률: " + d.progress + "%)</div>"
+      + "<div>☀️ 빛 노출: <strong>" + minsToTime(d.lightStart) + " ~ " + minsToTime(d.lightEnd) + "</strong></div>"
+      + "<div>🕶️ 선글라스: <strong>" + minsToTime(d.sunglassStart) + " ~ " + minsToTime(d.sunglassEnd) + "</strong></div>"
+      + "<div>😴 취침: <strong>" + minsToTime(d.sleepStart) + "</strong></div>"
+      + "<div>⏰ 기상: <strong>" + minsToTime(d.sleepEnd) + "</strong></div>"
+      + "<div>🌇 빛 감소: <strong>" + minsToTime(d.avoidStart) + "</strong></div>"
+      + "</div>";
   });
-  bodyHtml += '<div style="margin-top:10px;font-size:11px;color:#64748b;">* 모든 시간은 도착지 현지 시간 기준 | JetSync</div>';
-  bodyHtml += '</div>';
+  bodyHtml += "<div style=\"margin-top:10px;font-size:11px;color:#6e5a46;\">* 모든 시간은 도착지 현지 시간 기준 | LunaSync</div></div>";
 
-  document.getElementById('sc-body').innerHTML = bodyHtml;
+  document.getElementById("sc-body").innerHTML = bodyHtml;
 
-  var saveCard = document.getElementById('save-card');
-  saveCard.style.position = 'fixed';
-  saveCard.style.top = '-9999px';
-  saveCard.style.left = '-9999px';
-  saveCard.style.display = 'block';
-  saveCard.style.width = '600px';
+  var sc = document.getElementById("save-card");
+  sc.style.display = "block";
 
-  html2canvas(saveCard, {
-    backgroundColor: '#0d0f1a',
-    scale: 2,
-    useCORS: true,
-    logging: false
-  }).then(function(canvas) {
-    saveCard.style.display = 'none';
-    var link = document.createElement('a');
-    link.download = 'JetSync_' + (COUNTRY_NAMES[lastData.destKey] || lastData.destKey) + '_' + lastData.takeoffDate + '.png';
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-    showToast('✅ 이미지가 저장되었습니다!');
-  }).catch(function(err) {
-    saveCard.style.display = 'none';
-    showToast('저장 중 오류가 발생했습니다.');
-    console.error(err);
-  });
+  html2canvas(sc, { backgroundColor:"#1a1410", scale:2, useCORS:true, logging:false })
+    .then(function(canvas) {
+      sc.style.display = "none";
+      var link = document.createElement("a");
+      link.download = "LunaSync_" + (COUNTRY_NAMES[lastData.destKey] || lastData.destKey) + "_" + lastData.takeoffDate + ".png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+      showToast("✅ 이미지가 저장되었습니다!");
+    })
+    .catch(function(err) {
+      sc.style.display = "none";
+      showToast("저장 중 오류가 발생했습니다.");
+      console.error(err);
+    });
 }
 </script>
 </body>
