@@ -1018,9 +1018,9 @@ function calculate() {
   }
 
   var daysToAdapt = direction === "east"
-    ? Math.ceil(crossedZone * .5)
+    ? Math.ceil(crossedZones * .5)
     : direction === "west"
-    ? Math.ceil(crossedZone * .0)
+    ? Math.ceil(crossedZones * .67)
     : 0;
 
   var days = [];
