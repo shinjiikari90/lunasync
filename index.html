@@ -857,7 +857,7 @@ function calculate() {
   /* 동쪽: 취침을 앞당김 (음수 방향), 서쪽: 취침을 늦춤 (양수 방향) */
   var shiftPerDay = 0;
   if (direction !== "same" && daysToAdapt > 0) {
-    shiftPerDay = 60;
+    shiftPerDay = Math.min(90, Math.round(Math.abs(tzDiff) / daysToAdapt));
     if (direction === "east") shiftPerDay = -shiftPerDay; /* 앞당기기 */
   }
 
@@ -886,7 +886,7 @@ for (var day = 0; day < 5; day++) {
 
   /* ✅ day+1 기준으로 진행률 계산 */
   var progress = (daysToAdapt > 0)
-    ? Math.min(Math.round((day + 1) / daysToAdapt * 00), 100)
+    ? Math.min(Math.round((day + 1) / daysToAdapt * 100), 100)
     : 100;
 
   days.push({
