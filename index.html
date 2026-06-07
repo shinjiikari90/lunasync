@@ -838,7 +838,7 @@ function calculate() {
 
   var direction, dirLabel, dirClass;
   if      (tzDiff >  30) { direction = "east"; dirLabel = "동쪽 이동 (시간 앞당기기)"; dirClass = "dir-east"; }
-  else if (tzDiff < -30) { direction = "west"; dirLabel = "서쪽 이동 (시간 늦추기)";   dirClass = "dir-west"; }
+  else if (tzDiff < -30) { direction = "west"; dirLabel = "이동 (시간 늦추기)";   dirClass = "dir-west"; }
   else                   { direction = "same"; dirLabel = "시차 거의 없음";             dirClass = "dir-same"; }
 
   /*
@@ -892,7 +892,7 @@ function calculate() {
       /* 전날 취침에서 shiftPerDay씩 누적 이동 */
       bedMins = clampBed(days[day - 1].sleepStart + shiftPerDay);
     }
-
+console.log("day", day+1, "| 전날sleepStart:", day>0 ? days[day-1].sleepStart : "-", "| shiftPerDay:", shiftPerDay, "| 합산:", day>0 ? days[day-1].sleepStart + shiftPerDay : "-", "| clamp후:", bedMins);
     var wakeMins = mod1440(bedMins + sleepMins);
 
     /* ── 빛 노출 (기상 기준) ── */
@@ -1072,7 +1072,7 @@ function renderDay(d, data) {
   /* 진행률 배지 */
   html += "<div style=\"margin-bottom:14px;\">";
   if (d.progress >= 100) {
-    html += "<span class=\"badge badge-green\">✅ 이날부터 완전 적응!</span>";
+    html += "<span class=\"badge badge-green\">✅ 현지 적응 완료!</span>";
   } else {
     html += "<span class=\"badge badge-amber\">적응 진행률: " + d.progress + "%</span>";
   }
