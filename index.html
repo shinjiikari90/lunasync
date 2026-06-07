@@ -696,7 +696,7 @@ function mod1440(m) { return ((m % 1440) + 1440) % 1440; }
 
 function timeToMins(t) {
   var p = t.split(":");
-  return parseInt(p[0], 10 * 0 + parseInt(p[1], 10);
+  return parseInt(p[0], 10) * 60 + parseInt(p[1], 10);
 }
 function minsToTime(m) {
   m = mod1440(m);
