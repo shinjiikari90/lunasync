@@ -842,7 +842,7 @@ function calculate() {
 
   var direction, dirLabel, dirClass;
   if      (tzDiff >  30)  { direction = "east"; dirLabel = "동쪽 이동 (시간 앞당기기)"; dirClass = "dir-east"; }
-  else if (tzDiff < -30)  { direction = "west"; dirLabel = "서쪽 이동 (시간 늦추기)";   dirClass = "dir-west"; }
+  else if (tzDiff < -30)  { direction = "west"; dirLabel = "이동 (시간 늦추기)";   dirClass = "dir-west"; }
   else                    { direction = "same"; dirLabel = "시차 거의 없음";             dirClass = "dir-same"; }
 
   /* 적응에 필요한 총 일수 */
@@ -862,56 +862,51 @@ function calculate() {
   }
 
   var days = [];
-  var currentBed = day1Bed;  /* 연속값(분) — clamp 전 */
+  var currentBed = day1Bed; /* 연속값(분) — clamp 전 */
 
-  for (var day = 0; day < 5; day++) {
-    /* day 0 = 도착 첫날: 출발지 취침 기준 */
-    var bedMins  = (day === 0) ? day1Bed : clampBed(currentBed);
-    var wakeMins = mod1440(bedMins + sleepMins);
+for (var day = 0; day < 5; day++) {
+  /* ✅ clampBed는 여기서 한 번만 */
+  var bedMins  = (day === 0) ? day1Bed : clampBed(currentBed);
+  var wakeMins = mod1440(bedMins + sleepMins);
 
-    /* ── 논리 순서 보장: 취침 → 기상 → 빛노출 → 청색광차단 ── */
-
-    /* 빛 노출 (기상 기준) */
-    var lightStart, lightEnd;
-    if (direction === "east") {
-      /* 동쪽: 기상 직후 밝은 빛 → 위상 전진 */
-      lightStart = mod1440(wakeMins);
-      lightEnd   = mod1440(wakeMins + 120);
-    } else if (direction === "west") {
-      /* 서쪽: 기상 후 1~3시간 뒤 빛 노출 → 위상 지연 */
-      lightStart = mod1440(wakeMins + 60);
-      lightEnd   = mod1440(wakeMins + 180);
-    } else {
-      lightStart = mod1440(wakeMins);
-      lightEnd   = mod1440(wakeMins + 120);
-    }
-
-    /* 저녁 빛 감소 / 청색광 차단 (취침 기준 역산) */
-    /* 취침 3시간 전 시작, 취침 30분 전 종료 */
-    var avoidStart = mod1440(bedMins - 180);
-    var avoidEnd   = mod1440(bedMins - 30);
-
-    /* 적응 진행률 */
-    var progress = (daysToAdapt > 0)
-      ? Math.min(Math.round(day / daysToAdapt * 100), 100)
-      : 100;
-
-    days.push({
-      day:          day + 1,
-      sleepStart:   bedMins,
-      sleepEnd:     wakeMins,
-      lightStart:   lightStart,
-      lightEnd:     lightEnd,
-      avoidStart:   avoidStart,
-      avoidEnd:     avoidEnd,
-      sunglassStart:avoidStart,
-      sunglassEnd:  avoidEnd,
-      progress:     progress,
-      adapted:      progress >= 100
-    });
-
-    currentBed = clampBed(mod1440(bedMins + shiftPerDay));
+  var lightStart, lightEnd;
+  if (direction === "east") {
+    lightStart = mod1440(wakeMins);
+    lightEnd   = mod1440(wakeMins + 120);
+  } else if (direction === "west") {
+    lightStart = mod1440(wakeMins + 60);
+    lightEnd   = mod1440(wakeMins + 180);
+  } else {
+    lightStart = mod1440(wakeMins);
+    lightEnd   = mod1440(wakeMins + 120);
   }
+
+  var avoidStart = mod1440(bedMins - 180);
+  var avoidEnd   = mod1440(bedMins - 30);
+
+  /* ✅ day+1 기준으로 진행률 계산 */
+  var progress = (daysToAdapt > 0)
+    ? Math.min(Math.round((day + 1) / daysToAdap * 00), 100)
+    : 100;
+
+  days.push({
+    day:          day + 1,
+    sleepStart:   bedMins,
+    sleepEnd:     wakeMins,
+    lightStart:   lightStart,
+    lightEnd:     lightEnd,
+    avoidStart:   avoidStart,
+    avoidEnd:     avoidEnd,
+    sunglassStart:avoidStart,
+    sunglassEnd:  avoidEnd,
+    progress:     progress,
+    adapted:      progress >= 100
+  });
+
+  /* ✅ clampBed 없이 연속 누적 — clamp는 다음 루프의 bedMins에서 적용됨 */
+  currentBed = mod1440(bedMins + shiftPerDay);
+}
+
 
   lastData = {
     originKey, destKey, originOffset, destOffset,
