@@ -1270,25 +1270,48 @@ function buildTrackRow(label, start, end, cls, txt) {
   if (s < e) {
     var wPct = ((e - s) / 144 * 00).toFixed(2);
     var pPct = (s / 144 * 00).toFixed(2);
-    segs = "<div class=\"tl-segment " + cls + "\" style=\"left:" + pPct + "%;width:" + wPct + "%;\" title=\""
-      + minsToTime(s) + " ~ " + minsToTime(e) + "\">"
+    segs = "<div class=\"tl-segment " + cls + "\""
+      + " style=\"position:absolute;top:0;height:100%;"
+      + "left:" + pPct + "%;width:" + wPct + "%;border-radius:4px;"
+      + "display:flex;align-items:center;justify-content:center;"
+      + "font-size:10px;font-weight:700;overflow:hidden;white-space:nowrap;\""
+      + " title=\"" + minsToTime(s) + " ~ " + minsToTime(e) + "\">"
       + (parseFloat(wPct) > 5 ? txt : "") + "</div>";
   } else {
     var w1 = ((1440 - s) / 144 * 00).toFixed(2);
     var w2 = (e / 144 * 00).toFixed(2);
-    segs = "<div class=\"tl-segment " + cls + "\" style=\"left:" + (s/1440*100).toFixed(2) + "%;width:" + w1 + "%;\" title=\""
-      + minsToTime(s) + " ~ 24:00\">"
+    var p1 = (s / 144 * 00).toFixed(2);
+    segs = "<div class=\"tl-segment " + cls + "\""
+      + " style=\"position:absolute;top:0;height:100%;"
+      + "left:" + p1 + "%;width:" + w1 + "%;border-radius:4px;"
+      + "display:flex;align-items:center;justify-content:center;"
+      + "font-size:10px;font-weight:700;overflow:hidden;white-space:nowrap;\""
+      + " title=\"" + minsToTime(s) + " ~ 24:00\">"
       + (parseFloat(w1) > 5 ? txt : "") + "</div>";
     if (parseFloat(w2) > 0) {
-      segs += "<div class=\"tl-segment " + cls + "\" style=\"left:0%;width:" + w2 + "%;\" title=\"00:00 ~ "
-        + minsToTime(e) + "\">"
+      segs += "<div class=\"tl-segment " + cls + "\""
+        + " style=\"position:absolute;top:0;height:100%;"
+        + "left:0%;width:" + w2 + "%;border-radius:4px;"
+        + "display:flex;align-items:center;justify-content:center;"
+        + "font-size:10px;font-weight:700;overflow:hidden;white-space:nowrap;\""
+        + " title=\"00:00 ~ " + minsToTime(e) + "\">"
         + (parseFloat(w2) > 5 ? txt : "") + "</div>";
     }
   }
-  return "<div style=\"display:flex;align-items:center;gap:6px;margin-bottom:5px;\">"
-    + "<div style=\"width:84px;flex-shrink:0;font-size:10px;font-weight:600;"
-    + "color:var(--text-muted);text-align:right;white-space:nowrap;\">" + label + "</div>"
-    + "<div style=\"flex:1;position:relative;\"><div class=\"tl-track\">" + segs + "</div></div>"
+
+  /* 핵심: tl-track 자체에 position:relative 인라인으로 명시,
+     바깥 wrapper에는 position 없이 flex:1만 부여 */
+  return "<div style=\"display:flex;align-items:center;gap:8px;margin-bottom:6px;\">"
+    + "<div style=\"width:88px;flex-shrink:0;font-size:10px;font-weight:600;"
+    + "color:var(--text-muted);text-align:right;white-space:nowrap;padding-right:4px;\">"
+    + label + "</div>"
+    + "<div style=\"flex:1;\">"
+    + "<div style=\"position:relative;height:28px;"
+    + "background:rgba(255,255,255,0.03);"
+    + "border:1px solid var(--border);border-radius:8px;overflow:hidden;\">"
+    + segs
+    + "</div>"
+    + "</div>"
     + "</div>";
 }
 
