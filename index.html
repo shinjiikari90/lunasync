@@ -835,7 +835,7 @@ function calculate() {
   var destOffset   = TZ[destKey]   != null ? TZ[destKey]   : 0;
   var tzDiff       = destOffset - originOffset;          /* 양수 = 동쪽, 음수 = 서쪽 */
   var crossedZones = Math.round(Math.abs(tzDiff) / 60);
-  var sleepMins    = Math.round(sleepHour * 60);
+  var sleepMins    = Math.round(sleepHours * 60);
 
   /* 출발지 기준 평소 취침(분) */
   var homeBedMins  = timeToMins(bedTimeStr);
