@@ -802,21 +802,19 @@ document.addEventListener("DOMContentLoaded", function () {
           서쪽(west): 기상+1시간 ~ 기상+3시간 (아침을 조금 늦춰 빛 노출)
       → 어떤 경우에도 빛노출 < 청색광차단 < 취침 < 기상 순서 유지
 ═══════════════════════════════════════════════ */
-var MAX_SHIFT     = 90;  /* 하루 최대 조정폭 (분) */
+var MAX_SHIFT     = 60;  /* 하루 최대 조정폭 (분) */
 var BED_MIN       = 20 * 60;       /* 20:00 */
 var BED_MAX       = 1440 * 120;       /* 02:00 (다음날) = 1440+120 */
 
-function clampBed(rawMins) {
-  /*
-    rawMins 는 연속값(음수 가능, 1440 초과 가능)으로 넘어옴.
-    20:00(1200) ~ 26:00(1560) 범위로 클램핑한 뒤 mod1440 반환.
-  */
-  var m = rawMins;
-  /* 0~1440 사이로 우선 정규화 */
+function clampBed(m) {
   m = mod1440(m);
-  /* 20:00 미만이면 20:00, 02:00 초과이면 02:00 */
-  if (m < BED_MIN && m > 120) m = BED_MIN;  /* 02:01~19:59 → 20:00 */
-  if (m > 0 && m <= 120) m = 120;            /* 00:01~02:00 → 02:00 */
+  // 금지 구간: 02:01(121분) ~ 19:59(1199분)
+  if (m > 120 && m < 1200) {
+    // 가까운 경계로 끌어당김
+    var distTo0200   = m - 120;
+    var distTo2000   = 1200 - m;
+    return distTo0200 < distTo2000 ? 120 : 1200;
+  }
   return m;
 }
 
@@ -848,9 +846,9 @@ function calculate() {
   else                    { direction = "same"; dirLabel = "시차 거의 없음";             dirClass = "dir-same"; }
 
   /* 적응에 필요한 총 일수 */
-  var daysToAdapt = direction === "east" ? Math.ceil(crossedZones * .5)
-                  : direction === "west" ? Math.ceil(crossedZones * .67)
-                  : 0;
+  var daysToAdapt = direction !== "same"
+  ? Math.ceil(Math.abs(tzDiff) / 60)
+  : 0;
 
   /* 1일차 취침: 평소 취침 시간 그대로 (도착지 현지 기준) */
   var day1Bed = clampBed(homeBedMins + tzDiff);
@@ -859,7 +857,7 @@ function calculate() {
   /* 동쪽: 취침을 앞당김 (음수 방향), 서쪽: 취침을 늦춤 (양수 방향) */
   var shiftPerDay = 0;
   if (direction !== "same" && daysToAdapt > 0) {
-    shiftPerDay = Math.min(MAX_SHIFT, Math.round(Math.abs(tzDiff) / daysToAdapt));
+    shiftPerDay = 60;
     if (direction === "east") shiftPerDay = -shiftPerDay; /* 앞당기기 */
   }
 
@@ -912,9 +910,7 @@ function calculate() {
       adapted:      progress >= 100
     });
 
-    /* 다음 날 취침 시간 업데이트 */
-    if (day >= 1) currentBed = mod1440(bedMins + shiftPerDay);
-    else          currentBed = mod1440(day1Bed  + shiftPerDay);
+    currentBed = clampBed(mod1440(bedMins + shiftPerDay));
   }
 
   lastData = {
