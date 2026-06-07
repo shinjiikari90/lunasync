@@ -826,94 +826,126 @@ function calculate() {
   var takeoffTime = document.getElementById("takeoff-time").value;
   var landingTime = document.getElementById("landing-time").value;
   var bedTimeStr  = document.getElementById("sleep-bed").value;
-  var wakeTimeStr = document.getElementById("sleep-wake").value;
   var sleepHours  = parseFloat(document.getElementById("sleep-hours").value) || 8;
 
   var originOffset = TZ[originKey] != null ? TZ[originKey] : 540;
   var destOffset   = TZ[destKey]   != null ? TZ[destKey]   : 0;
-  var tzDiff       = destOffset - originOffset;          /* 양수 = 동쪽, 음수 = 서쪽 */
+  var tzDiff       = destOffset - originOffset;
   var crossedZones = Math.round(Math.abs(tzDiff) / 60);
-  var sleepMins    = Math.round(sleepHours * 60);
+  var sleepMins    = Math.round(sleepHour * 0);
 
-  /* 출발지 기준 평소 취침(분) */
   var homeBedMins  = timeToMins(bedTimeStr);
-  /* 목표 취침: 출발지 취침 시간을 도착지 시간으로 단순 변환 */
-  var targetBedRaw = mod1440(homeBedMins + tzDiff);
 
   var direction, dirLabel, dirClass;
-  if      (tzDiff >  30)  { direction = "east"; dirLabel = "동쪽 이동 (시간 앞당기기)"; dirClass = "dir-east"; }
-  else if (tzDiff < -30)  { direction = "west"; dirLabel = "이동 (시간 늦추기)";   dirClass = "dir-west"; }
-  else                    { direction = "same"; dirLabel = "시차 거의 없음";             dirClass = "dir-same"; }
+  if      (tzDiff >  30) { direction = "east"; dirLabel = "동쪽 이동 (시간 앞당기기)"; dirClass = "dir-east"; }
+  else if (tzDiff < -30) { direction = "west"; dirLabel = "서쪽 이동 (시간 늦추기)";   dirClass = "dir-west"; }
+  else                   { direction = "same"; dirLabel = "시차 거의 없음";             dirClass = "dir-same"; }
 
-  /* 적응에 필요한 총 일수 */
-  var daysToAdapt = direction !== "same"
-  ? Math.ceil(Math.abs(tzDiff) / 60)
-  : 0;
+  /*
+    ─────────────────────────────────────────
+    daysToAdapt: 5일 표시 범위 안에서 100%에
+    도달하도록 최대 5로 제한.
+    실제 적응 기간은 뱃지 문구로 별도 표시.
+    ─────────────────────────────────────────
+  */
+  var realDaysToAdapt = direction !== "same"
+    ? Math.ceil(Math.abs(tzDiff) / 60)
+    : 0;
 
-  /* 1일차 취침: 평소 취침 시간 그대로 (도착지 현지 기준) */
-  var day1Bed = clampBed(homeBedMins + tzDiff);
+  /* 루프용: 5일차에서 100%가 찍히게 하려면
+     progress = day / daysToAdapt 이고
+     day 최대값 = 4 (0-based index)이므로
+     5일차(index=4)에 100%가 되려면 daysToAdapt <= 4 여야 함.
+     단, 시차가 작아 realDaysToAdapt < 4 이면 그 값 그대로 사용. */
+  var daysToAdapt = direction === "same" ? 0 : Math.min(realDaysToAdapt, 4);
 
-  /* 각 일차별 목표 취침 변화량 */
-  /* 동쪽: 취침을 앞당김 (음수 방향), 서쪽: 취침을 늦춤 (양수 방향) */
+  /* shiftPerDay: 5일 안에 목표 취침 시간에 도달하는 1일 조정폭 */
+  var totalShift  = tzDiff; /* 도착지 취침 - 출발지 취침 (분) */
   var shiftPerDay = 0;
   if (direction !== "same" && daysToAdapt > 0) {
-    shiftPerDay = Math.min(90, Math.round(Math.abs(tzDiff) / daysToAdapt));
-    if (direction === "east") shiftPerDay = -shiftPerDay; /* 앞당기기 */
+    /* 5일 안에 totalShift를 다 커버 */
+    shiftPerDay = totalShift / daysToAdapt;
+    /* 1일 최대 90분 제한 (방향 부호 유지) */
+    var maxShift = direction === "east" ? -90 : 90;
+    if (direction === "east" && shiftPerDay < maxShift) shiftPerDay = maxShift;
+    if (direction === "west" && shiftPerDay > maxShift) shiftPerDay = maxShift;
   }
+
+  /*
+    ─────────────────────────────────────────
+    1일차 취침: 평소 취침을 도착지 현지로 변환
+    (아직 적응 안 된 상태 = 그냥 내 몸이
+     출발지 시간대 취침 시간에 졸린 상태)
+    ─────────────────────────────────────────
+  */
+  var day1Bed = clampBed(homeBedMins + tzDiff);
 
   var days = [];
-  var currentBed = day1Bed; /* 연속값(분) — clamp 전 */
 
-for (var day = 0; day < 5; day++) {
-  /* ✅ clampBed는 여기서 한 번만 */
-  var bedMins  = (day === 0) ? day1Bed : clampBed(currentBed);
-  var wakeMins = mod1440(bedMins + sleepMins);
+  for (var day = 0; day < 5; day++) {
 
-  var lightStart, lightEnd;
-  if (direction === "east") {
-    lightStart = mod1440(wakeMins);
-    lightEnd   = mod1440(wakeMins + 120);
-  } else if (direction === "west") {
-    lightStart = mod1440(wakeMins + 60);
-    lightEnd   = mod1440(wakeMins + 180);
-  } else {
-    lightStart = mod1440(wakeMins);
-    lightEnd   = mod1440(wakeMins + 120);
+    /* ── 취침 시간 결정 ── */
+    var bedMins;
+    if (day === 0) {
+      bedMins = day1Bed;
+    } else {
+      /* 전날 취침에서 shiftPerDay씩 누적 이동 */
+      bedMins = clampBed(days[day - 1].sleepStart + shiftPerDay);
+    }
+
+    var wakeMins = mod1440(bedMins + sleepMins);
+
+    /* ── 빛 노출 (기상 기준) ── */
+    var lightStart, lightEnd;
+    if (direction === "east") {
+      lightStart = mod1440(wakeMins);
+      lightEnd   = mod1440(wakeMins + 120);
+    } else if (direction === "west") {
+      lightStart = mod1440(wakeMins + 60);
+      lightEnd   = mod1440(wakeMins + 180);
+    } else {
+      lightStart = mod1440(wakeMins);
+      lightEnd   = mod1440(wakeMins + 120);
+    }
+
+    /* ── 청색광 차단: 취침 3시간 전 ~ 취침 30분 전 ── */
+    var avoidStart = mod1440(bedMins - 180);
+    var avoidEnd   = mod1440(bedMins - 30);
+
+    /* ── 진행률 ── */
+    /*
+      day=0 → 0%  (아직 첫날)
+      day=4 → 100% (daysToAdapt=4 기준)
+    */
+    var progress;
+    if (direction === "same") {
+      progress = 100;
+    } else {
+      progress = Math.min(Math.round((day / daysToAdapt * 00), 100);
+    }
+
+    days.push({
+      day:          day + 1,
+      sleepStart:   bedMins,
+      sleepEnd:     wakeMins,
+      lightStart:   lightStart,
+      lightEnd:     lightEnd,
+      avoidStart:   avoidStart,
+      avoidEnd:     avoidEnd,
+      sunglassStart:avoidStart,
+      sunglassEnd:  avoidEnd,
+      progress:     progress,
+      adapted:      progress >= 100
+    });
   }
-
-  var avoidStart = mod1440(bedMins - 180);
-  var avoidEnd   = mod1440(bedMins - 30);
-
-  /* ✅ day+1 기준으로 진행률 계산 */
-  var progress = (daysToAdapt > 0)
-    ? Math.min(Math.round((day + 1) / daysToAdapt * 100), 100)
-    : 100;
-
-  days.push({
-    day:          day + 1,
-    sleepStart:   bedMins,
-    sleepEnd:     wakeMins,
-    lightStart:   lightStart,
-    lightEnd:     lightEnd,
-    avoidStart:   avoidStart,
-    avoidEnd:     avoidEnd,
-    sunglassStart:avoidStart,
-    sunglassEnd:  avoidEnd,
-    progress:     progress,
-    adapted:      progress >= 100
-  });
-
-  /* ✅ clampBed 없이 연속 누적 — clamp는 다음 루프의 bedMins에서 적용됨 */
-  currentBed = mod1440(bedMins + shiftPerDay);
-}
-
 
   lastData = {
     originKey, destKey, originOffset, destOffset,
     tzDiff, crossedZones, direction, dirLabel, dirClass,
-    daysToAdapt, sleepMins,
+    realDaysToAdapt, daysToAdapt, sleepMins,
     days, takeoffDate, landingDate, takeoffTime, landingTime
   };
+
   renderResult(lastData);
 }
 
