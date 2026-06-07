@@ -895,7 +895,7 @@ function calculate() {
 
     /* 적응 진행률 */
     var progress = (daysToAdapt > 0)
-      ? Math.min(Math.round((day / daysToAdapt * 100), 100)
+      ? Math.min(Math.round(day / daysToAdapt * 100), 100)
       : 100;
 
     days.push({
