@@ -893,7 +893,7 @@ var lastData = null;
 ═══════════════════════════════ */
 function timeToMins(t) {
   var p = t.split(":");
-  return parseInt(p[0] * 0 + parseInt(p[1]);
+  return parseInt(p[0]) * 60 + parseInt(p[1]);
 }
 function minsToTime(m) {
   m = ((m % 1440) + 1440) % 1440;
