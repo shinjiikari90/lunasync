@@ -832,7 +832,7 @@ function calculate() {
   var destOffset   = TZ[destKey]   != null ? TZ[destKey]   : 0;
   var tzDiff       = destOffset - originOffset;
   var crossedZones = Math.round(Math.abs(tzDiff) / 60);
-  var sleepMins    = Math.round(sleepHour * 60);
+  var sleepMins    = Math.round(sleepHours * 60);
 
   var homeBedMins  = timeToMins(bedTimeStr);
 
