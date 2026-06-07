@@ -803,8 +803,8 @@ document.addEventListener("DOMContentLoaded", function () {
       → 어떤 경우에도 빛노출 < 청색광차단 < 취침 < 기상 순서 유지
 ═══════════════════════════════════════════════ */
 var MAX_SHIFT     = 90;  /* 하루 최대 조정폭 (분) */
-var BED_MIN       = 2 * 0;       /* 20:00 */
-var BED_MAX       = 2 * 0;       /* 02:00 (다음날) = 1440+120 */
+var BED_MIN       = 20 * 60;       /* 20:00 */
+var BED_MAX       = 1440 * 120;       /* 02:00 (다음날) = 1440+120 */
 
 function clampBed(rawMins) {
   /*
@@ -835,7 +835,7 @@ function calculate() {
   var destOffset   = TZ[destKey]   != null ? TZ[destKey]   : 0;
   var tzDiff       = destOffset - originOffset;          /* 양수 = 동쪽, 음수 = 서쪽 */
   var crossedZones = Math.round(Math.abs(tzDiff) / 60);
-  var sleepMins    = Math.round(sleepHour * 0);
+  var sleepMins    = Math.round(sleepHour * 60);
 
   /* 출발지 기준 평소 취침(분) */
   var homeBedMins  = timeToMins(bedTimeStr);
@@ -1127,14 +1127,14 @@ function buildTrackRow(label, start, end, cls, txt) {
   if (s === e) {
     /* 구간 없음 */
   } else if (s < e) {
-    var wPct = ((e - s) / 144 * 00).toFixed(2);
-    var pPct = (s / 144 * 00).toFixed(2);
+    var wPct = ((e - s) / 1440 * 100).toFixed(2);
+    var pPct = (s / 1440 * 100).toFixed(2);
     segs = seg(cls, pPct, wPct, minsToTime(s) + " ~ " + minsToTime(e), parseFloat(wPct) > 5 ? txt : "");
   } else {
     /* 자정 넘김 */
-    var w1   = ((1440 - s) / 144 * 00).toFixed(2);
-    var w2   = (e / 144 * 00).toFixed(2);
-    var p1   = (s / 144 * 00).toFixed(2);
+    var w1   = ((1440 - s) / 1440 * 100).toFixed(2);
+    var w2   = (e / 1440 * 100).toFixed(2);
+    var p1   = (s / 1440 * 100).toFixed(2);
     segs += seg(cls, p1,  w1, minsToTime(s) + " ~ 24:00",         parseFloat(w1) > 5 ? txt : "");
     if (parseFloat(w2) > 0)
       segs += seg(cls, "0.00", w2, "00:00 ~ " + minsToTime(e), parseFloat(w2) > 5 ? txt : "");
