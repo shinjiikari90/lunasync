@@ -1018,7 +1018,7 @@ function calculate() {
   }
 
   var daysToAdapt = direction === "east"
-    ? Math.ceil(crossedZones * .5)
+    ? Math.ceil(crossedZones * 1.5)
     : direction === "west"
     ? Math.ceil(crossedZones * .67)
     : 0;
@@ -1026,8 +1026,8 @@ function calculate() {
   var days = [];
   for (var day = 0; day < 5; day++) {
     var progress = daysToAdapt > 0 ? Math.min(day / daysToAdapt, 1) : 1;
-    var shiftedBed  = ((bedMins  + tzDif * rogress) % 1440 + 1440) % 1440;
-    var shiftedWake = ((wakeMins + tzDif * rogress) % 1440 + 1440) % 1440;
+    var shiftedBed  = ((bedMins  + tzDiff * progress) % 1440 + 1440) % 1440;
+    var shiftedWake = ((wakeMins + tzDiff * progress) % 1440 + 1440) % 1440;
     var tminLocal   = ((shiftedWake - 120) + 1440) % 1440;
 
     var lightStart, lightEnd, avoidStart, avoidEnd;
