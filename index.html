@@ -469,9 +469,11 @@ select {
           <option value="NZ">🇳🇿 뉴질랜드 (UTC+12)</option>
           <option value="ZA">🇿🇦 남아공 (UTC+2)</option>
         </select>
-      </div>
-      <div class="switch-container" style="display: flex; align-items: center; justify-content: center; padding-top: 25px;">
-    <button type="button" id="switchBtn" onclick="switchLocations()" style="cursor: pointer; padding: 10px; font-size: 20px;">⇄</button>
+     <div style="position: relative; height: 0px;">
+    <button type="button" id="switchBtn" onclick="switchLocations()" 
+            style="position: absolute; right: 20px; top: -35px; cursor: pointer; padding: 4px 8px; border-radius: 5px; border: 1px solid #444; background: #333; color: white; font-size: 14px;">
+      ⇄
+    </button>
   </div>
       <div class="form-group">
         <label>🛬 도착 국가 / 지역</label>
