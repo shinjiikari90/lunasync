@@ -966,13 +966,17 @@ if (direction !== "same" && daysToAdapt > 0) {
 /* ────────────────────────────────────────────────────────
    1일차 취침: 평소 취침을 도착지 현지로 변환 (적응 전 내 몸 상태)
 ──────────────────────────────────────────────────────── */
-console.log("DEBUG - homeBedMins:", homeBedMins, "tzDiff:", tzDiff);
-console.log("DEBUG - day1Bed 계산값:", day1Bed);
+// [깔끔하게 정리한 부분]
+var homeBedMins = timeToMins(bedTimeStr); 
 var rawDay1Bed = homeBedMins + tzDiff;
 var day1Bed = rawDay1Bed % 1440;
 if (day1Bed < 0) day1Bed += 1440;
+
+// 로그로 검증
+console.log("DEBUG - 최종 입력값 확인 -> homeBedMins:", homeBedMins, "tzDiff:", tzDiff);
+console.log("DEBUG - 1일차 취침 시간 확정:", day1Bed);
+
 var days = [];
-// [추가] 시차 3시간(180분) 미만 여부 확인
 var isSmallJetlag = Math.abs(tzDiff) < 180;
 
 for (var day = 0; day < 5; day++) {
@@ -980,7 +984,6 @@ for (var day = 0; day < 5; day++) {
   
   if (day === 0) {
     bedMins = day1Bed;
-    console.log("DEBUG - 1일차 취침 시간:", bedMins);
   } else {
     // [핵심] shiftPerDay는 이동량(절댓값)이고, 
     // direction에 따라 + 또는 -를 결정해야 함!
