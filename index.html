@@ -415,9 +415,9 @@ select {
       </div>
     </div>
     <div class="form-grid">
-      <div class="form-group">
+      <div class="form-group" style="position: relative;">
         <label>🛫 출발 국가</label>
-        <select id="origin-country">
+        <select id="origin-country" style="padding-right: 50px;">
           <option value="KR">🇰🇷 대한민국 (UTC+9)</option>
           <option value="JP">🇯🇵 일본 (UTC+9)</option>
           <option value="CN">🇨🇳 중국 (UTC+8)</option>
@@ -469,8 +469,10 @@ select {
           <option value="NZ">🇳🇿 뉴질랜드 (UTC+12)</option>
           <option value="ZA">🇿🇦 남아공 (UTC+2)</option>
         </select>
-     <div style="padding-top: 25px;">
-    <button type="button" id="switchBtn" onclick="switchLocations()" style="padding: 10px; cursor: pointer;">⇄</button>
+     <button type="button" id="switchBtn" onclick="switchLocations()" 
+            style="position: absolute; right: 0; top: 25px; width: 45px; height: 48px; border-radius: 0 5px 5px 0; cursor: pointer;">
+      ⇄
+    </button>
   </div>
       <div class="form-group">
         <label>🛬 도착 국가 / 지역</label>
