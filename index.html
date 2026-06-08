@@ -880,6 +880,8 @@ function clampBed(m) {
 function calculate() {
   var originKey   = document.getElementById("origin-country").value;
   var destKey     = document.getElementById("dest-country").value;
+  console.log("출발지:", originKey, "오프셋:", TZ[originKey]);
+    console.log("도착지:", destKey, "오프셋:", TZ[destKey]);
   var takeoffDate = document.getElementById("takeoff-date").value;
   var landingDate = document.getElementById("landing-date").value;
   var takeoffTime = document.getElementById("takeoff-time").value;
