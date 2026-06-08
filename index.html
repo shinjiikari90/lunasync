@@ -934,16 +934,20 @@ for (var day = 0; day < 5; day++) {
   if (day === 0) {
     bedMins = day1Bed;
   } else {
+    // 1. 기본 ideal 계산
     var idealBedMins = days[day - 1].sleepStart + shiftPerDay;
     
-    // [핵심] 소시차면 변화폭을 하루 최대 20분으로 제한해서 널뛰기 방지!
-    var dailyChange = shiftPerDay;
+    // 2. [울타리] 시차가 작으면 하루 20분 제한
+    var finalTarget = idealBedMins;
     if (isSmallJetlag) {
-        dailyChange = Math.max(Math.min(shiftPerDay, 20), -20);
+        var diff = idealBedMins - days[day - 1].sleepStart;
+        if (Math.abs(diff) > 20) {
+            finalTarget = days[day - 1].sleepStart + (diff > 0 ? 20 : -20);
+        }
     }
     
-    // 조정된 변화폭 적용
-    var targetMins = days[day - 1].sleepStart + dailyChange;
+    // 3. 이제 이 targetMins를 써서 예외처리 진행
+    var targetMins = finalTarget; 
 
     if (direction === "east" && targetMins < BED_MIN) {
       var remainingDays = 5 - day;
@@ -953,7 +957,8 @@ for (var day = 0; day < 5; day++) {
     } 
     else if (direction === "west" && targetMins > 120 && targetMins < 1200) {
       var remainingDays = 5 - day;
-      bedMins = days[day - 1].sleepStart + (dailyChange * 0.7);
+      // 여기서 dailyChange 대신 targetMins 사용!
+      bedMins = days[day - 1].sleepStart + ((targetMins - days[day - 1].sleepStart) * 0.7);
       if (bedMins > 120) bedMins = 120 - (day * 15);
     } 
     else {
