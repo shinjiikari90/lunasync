@@ -974,8 +974,7 @@ if (direction !== "same" && daysToAdapt > 0) {
 ──────────────────────────────────────────────────────── */
 // [깔끔하게 정리한 부분]
 var homeBedMins = timeToMins(bedTimeStr); 
-var rawDay1Bed = homeBedMins + tzDiff;
-var day1Bed = rawDay1Bed % 1440;
+var day1Bed = (homeBedMins - tzDiff) % 1440;
 if (day1Bed < 0) day1Bed += 1440;
 
 // 로그로 검증
