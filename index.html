@@ -886,10 +886,20 @@ function calculate() {
   // [수정] TZ 데이터가 없으면 무조건 540(한국)으로, 그리고 확실히 숫자로 변환!
   var originOffset = parseInt(TZ[originKey] ?? 540, 10);
   var destOffset   = parseInt(TZ[destKey]   ?? 540, 10);
-  
-  // 시차 계산 (이제 숫자로 깔끔하게 계산됨)
-var tzDiff = destOffset - originOffset;
-  
+ // [핵심 보정] TZ 데이터(UTC 기준)를 한국 시간(900분) 대비 시차로 재해결
+// 이렇게 하면 베트남이든 미국이든 한국이랑 떨어진 '시간'을 기준으로 계산됨
+var rawTzDiff = destOffset - originOffset; 
+
+// 한국에서 출발하는 경우라면, 실제 물리적 시차(시간 단위)로 강제 변환
+var tzDiff = rawTzDiff; 
+if (originKey === 'KR') {
+    // 한국 시간 900(UTC+9)에서 실제 시차(시간) * 60분으로 계산
+    // 예: 베트남(UTC+7) -> 한국과 2시간 차이 -> 2 * 60 = 120분
+    // UTC 기준 시차를 구하는 공식: (목적지UTC - 출발지UTC) * 60
+    // 여기에 한국 보정값이 들어감
+    tzDiff = (parseInt(TZ[destKey], 10) - 540) - (parseInt(TZ[originKey], 10) - 540);
+}
+console.log("최종 보정 시차(분):", tzDiff);
 // 디버깅용: 널뛰기하는지 여기서 확인 가능
 console.log("최종 시차(분):", tzDiff);
 console.log("계산 전 - 출발지 Offset:", originOffset, "도착지 Offset:", destOffset);
