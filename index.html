@@ -925,19 +925,20 @@ console.log("day", day+1, "| 전날sleepStart:", day>0 ? days[day-1].sleepStart 
       day=0 → 0%  (아직 첫날)
       day=4 → 100% (daysToAdapt=4 기준)
     */
+    // --- 1~5일차 계산 루프 내부 ---
     var progress;
     if (direction === "same") {
       progress = 100;
     } else {
       if (day === 4 || day >= daysToAdapt) {
-    progress = 100;
-  } else {
-    // 괄호 오타 수정 및 안전하게 진행률 계산
-    progress = Math.round((day / daysToAdapt) * 100);
-    
-    // 혹시라도 마지막 날이 아닌데 100%가 먼저 나오는 걸 방지하기 위해 최대 99%로 클램핑
-    if (progress >= 100) progress = 99; 
-  }
+        progress = 100;
+      } else {
+        // 괄호 오타 수정 및 안전하게 진행률 계산
+        progress = Math.round((day / daysToAdapt) * 100);
+        
+        // 혹시라도 마지막 날이 아닌데 100%가 먼저 나오는 걸 방지하기 위해 최대 99%로 클램핑
+        if (progress >= 100) progress = 99; 
+      }
     }
 
     days.push({
@@ -953,8 +954,9 @@ console.log("day", day+1, "| 전날sleepStart:", day>0 ? days[day-1].sleepStart 
       progress:     progress,
       adapted:      progress >= 100
     });
-  }
+  } // 👈 [핵심] 실종됐던 for 루프 닫는 중괄호 추가 완료!
 
+  // --- 여기서부터는 5일치 계산이 다 끝나고 실행되는 영역 ---
   lastData = {
     originKey, destKey, originOffset, destOffset,
     tzDiff, crossedZones, direction, dirLabel, dirClass,
@@ -963,7 +965,7 @@ console.log("day", day+1, "| 전날sleepStart:", day>0 ? days[day-1].sleepStart 
   };
 
   renderResult(lastData);
-}
+} // 👈 calculate() 함수 종료 양호!
 
 /* ═══════════════════════════════════════════════
    RENDER RESULT
