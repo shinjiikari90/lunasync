@@ -926,6 +926,10 @@ console.log("day", day+1, "| 전날sleepStart:", day>0 ? days[day-1].sleepStart 
       day=4 → 100% (daysToAdapt=4 기준)
     */
     // --- 1~5일차 계산 루프 내부 ---
+    /* ────────────────────────────────────────────────────────
+       진행률(progress) 계산
+       day=0 → 0% (첫날) / day=4 → 100% (5일차 강제 골인 예외처리 보완)
+    ──────────────────────────────────────────────────────── */
     var progress;
     if (direction === "same") {
       progress = 100;
@@ -954,9 +958,8 @@ console.log("day", day+1, "| 전날sleepStart:", day>0 ? days[day-1].sleepStart 
       progress:     progress,
       adapted:      progress >= 100
     });
-  } // 👈 [핵심] 실종됐던 for 루프 닫는 중괄호 추가 완료!
+  } // 👈 1) for 루프 안전하게 종료
 
-  // --- 여기서부터는 5일치 계산이 다 끝나고 실행되는 영역 ---
   lastData = {
     originKey, destKey, originOffset, destOffset,
     tzDiff, crossedZones, direction, dirLabel, dirClass,
@@ -965,7 +968,7 @@ console.log("day", day+1, "| 전날sleepStart:", day>0 ? days[day-1].sleepStart 
   };
 
   renderResult(lastData);
-} // 👈 calculate() 함수 종료 양호!
+} // 👈 2) calculate() 함수 안전하게 종료
 
 /* ═══════════════════════════════════════════════
    RENDER RESULT
@@ -1045,15 +1048,15 @@ function renderResult(data) {
     +   "</div>"
     +   "<div class=\"tips-grid\">"
     +     "<div class=\"tip-card\"><div class=\"tip-head\">💊 멜라토닌</div>"
-    +       "<p>" + (isEast
+    +     "<p>" + (isEast
           ? "도착지 현지 취침 30분 전 0.5~3mg 복용. 새 시간대에 빠르게 잠들도록 도와줍니다."
           : "현지 저녁 시간에 소량(0.5mg) 복용하면 생체시계를 늦추는 데 도움이 됩니다.") + "</p></div>"
     +     "<div class=\"tip-card\"><div class=\"tip-head\">🌅 아침 빛 노출</div>"
-    +       "<p>기상 직후 30분간 밝은 빛(자연광 또는 10,000 lux 라이트 테라피)을 받으면 생체시계 리셋 효과가 극대화됩니다.</p></div>"
+    +     "<p>기상 직후 30분간 밝은 빛(자연광 또는 10,000 lux 라이트 테라피)을 받으면 생체시계 리셋 효과가 극대화됩니다.</p></div>"
     +     "<div class=\"tip-card\"><div class=\"tip-head\">🍽️ 식사 시간</div>"
-    +       "<p>도착 즉시 현지 식사 시간에 맞춰 식사하세요. 소화기관의 시계도 생체리듬 조정에 관여합니다.</p></div>"
+    +     "<p>도착 즉시 현지 식사 시간에 맞춰 식사하세요. 소화기관의 시계도 생체리듬 조정에 관여합니다.</p></div>"
     +     "<div class=\"tip-card\"><div class=\"tip-head\">🕶️ 청색광 차단</div>"
-    +       "<p>취침 3시간 전부터 선글라스 또는 시차적응용 안경 착용 및 스마트폰 야간 모드. 멜라토닌 분비 보호가 핵심입니다.</p></div>"
+    +     "<p>취침 3시간 전부터 선글라스 또는 시차적응용 안경 착용 및 스마트폰 야간 모드. 멜라토닌 분비 보호가 핵심입니다.</p></div>"
     +   "</div>"
     + "</div>";
 
@@ -1070,8 +1073,7 @@ function renderResult(data) {
    RENDER DAY
 ═══════════════════════════════════════════════ */
 function renderDay(d, data) {
-  /* 빛 노출 구간 중간값으로 낮/밤 판별 */
-  var lightMidRaw  = d.lightStart + 60;  /* lightStart~lightEnd 중간 근사 */
+  var lightMidRaw   = d.lightStart + 60;  
   var isLightDay   = isDaytime(lightMidRaw);
   var isAvoidDay   = isDaytime(d.avoidStart);
 
@@ -1087,7 +1089,6 @@ function renderDay(d, data) {
 
   var html = "";
 
-  /* 진행률 배지 */
   html += "<div style=\"margin-bottom:14px;\">";
   if (d.progress >= 100) {
     html += "<span class=\"badge badge-green\">✅ 현지 적응 완료!</span>";
@@ -1096,7 +1097,6 @@ function renderDay(d, data) {
   }
   html += "</div>";
 
-  /* 스케줄 순서: 빛 노출 → 청색광 차단 → 취침 → 기상 */
   html += "<div class=\"schedule-list\">"
     + schedItem("sched-morning",  "☀️",  "morning-color",
         lightTitle,
@@ -1116,21 +1116,16 @@ function renderDay(d, data) {
         "기상 즉시 커튼을 열거나 라이트 테라피 램프를 켜세요. 하루 중 가장 강력한 시계 리셋 타이밍입니다.")
     + "</div>";
 
-  /* 타임라인 */
   var tlLightLabel = isLightDay ? "☀️ 자연광" : "💡 라이트테라피";
   var tlLightTxt   = isLightDay ? "☀️" : "💡";
 
   html += "<div style=\"margin-top:22px;\">"
     + "<div style=\"font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:10px;\">⏱️ 24시간 타임라인 — 도착지 현지 시간 기준</div>"
-
-    /* 범례 */
     + "<div style=\"display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;\">"
     + legendDot("linear-gradient(90deg,#8b3a50,#b85c6e)", "😴 수면")
     + legendDot("linear-gradient(90deg,#1a6a8a,#4fc3f7)", isLightDay ? "☀️ 자연광" : "💡 라이트 테라피")
     + legendDot("linear-gradient(90deg,#8a4a00,#f0a500)", "🕶️ 청색광 차단")
     + "</div>"
-
-    /* 눈금 + 트랙 */
     + "<div style=\"overflow-x:auto;padding-bottom:6px;\">"
     + "<div style=\"min-width:520px;\">"
     + buildRuler()
@@ -1172,7 +1167,6 @@ function buildTrackRow(label, start, end, cls, txt) {
     var pPct = (s / 1440 * 100).toFixed(2);
     segs = seg(cls, pPct, wPct, minsToTime(s) + " ~ " + minsToTime(e), parseFloat(wPct) > 5 ? txt : "");
   } else {
-    /* 자정 넘김 */
     var w1   = ((1440 - s) / 1440 * 100).toFixed(2);
     var w2   = (e / 1440 * 100).toFixed(2);
     var p1   = (s / 1440 * 100).toFixed(2);
