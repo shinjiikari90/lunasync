@@ -470,6 +470,9 @@ select {
           <option value="ZA">🇿🇦 남아공 (UTC+2)</option>
         </select>
       </div>
+      <div class="switch-container" style="display: flex; align-items: center; justify-content: center; padding-top: 25px;">
+    <button type="button" id="switchBtn" onclick="switchLocations()" style="cursor: pointer; padding: 10px; font-size: 20px;">⇄</button>
+  </div>
       <div class="form-group">
         <label>🛬 도착 국가 / 지역</label>
         <select id="dest-country">
@@ -1391,6 +1394,16 @@ function saveAsImage() {
 </div>
 </body>
   <script>
+    function switchLocations() {
+      var originSelect = document.getElementById("origin-country");
+      var destSelect = document.getElementById("dest-country");
+      
+      var temp = originSelect.value;
+      originSelect.value = destSelect.value;
+      destSelect.value = temp;
+      
+      console.log("위치 스위치 완료!");
+  }
  const policyTexts = {
     terms: `[이용약관]\n\n제1조 (목적)\n본 약관은 '플래닛랩스'(이하 '회사')가 제공하는 LunaSync 서비스 및 관련 제반 서비스의 이용과 관련하여 회사와 회원 간의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.\n\n제2조 (이용계약의 성립)\n1. 이용계약은 회원이 본 약관의 내용에 동의하고 서비스 이용 신청을 하며, 회사가 이를 승낙함으로써 성립합니다.\n2. 회사는 기술상 또는 업무상 지장이 없는 한 신청을 승낙함을 원칙으로 합니다.\n\n제3조 (서비스의 제공 및 변경)\n1. 회사는 회원에게 생체리듬 기반 시차 적응 스케줄링 가이드 서비스를 제공합니다.\n2. 본 서비스가 제공하는 스케줄은 사용자의 입력 데이터에 기반한 정보성 가이드이며, 의료적 진단이나 처방을 대신할 수 없습니다.\n3. 회사는 서비스의 개선을 위해 사전 고지 후 서비스 내용을 변경할 수 있습니다.`,
     privacy: `[개인정보처리방침]\n\n'플래닛랩스'는 회원의 개인정보를 소중히 다루며, 개인정보보호법 등 관련 법령을 준수합니다.\n\n1. 수집하는 개인정보 항목\n- 필수항목: 서비스 이용 기록, 기기 정보, 타임존 데이터, 수면 패턴 기록\n- 선택항목: 이메일 주소 (이벤트 및 서비스 안내 목적)\n\n2. 개인정보의 수집 및 이용 목적\n- 사용자 맞춤형 시차 적응 플랜 알고리즘 연산 및 결과 제공\n- 서비스 오류 수정, 부정 이용 방지 및 서비스 품질 개선\n\n3. 개인정보의 보유 및 이용기간\n회원의 개인정보는 원칙적으로 서비스 회원 탈퇴 시 또는 목적이 달성된 후 지체 없이 파기합니다. 단, 관련 법령의 규정에 의하여 보존할 필요가 있는 경우 일정 기간 보존합니다.`,
