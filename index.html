@@ -271,6 +271,61 @@ select {
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+/* 푸터 & 모달 커스텀 스타일 (기존 코드 다크 테마 반영 완료) */
+.service-footer {
+  background-color: var(--card); /* 기존의 깊은 브라운 컬러 연동 */
+  color: var(--text-muted);
+  padding: 40px 20px;
+  font-size: 13px;
+  line-height: 1.6;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  margin-top: 40px;
+}
+.footer-container { max-width: 760px; margin: 0 auto; }
+.company-info { margin-bottom: 8px; color: var(--text-muted); }
+.company-info strong { color: var(--cream); }
+.footer-links { color: var(--border-light); }
+.link-item {
+  color: var(--amber); /* 오렌지/앰버 포인트 컬러 연동 */
+  cursor: pointer;
+  font-weight: 600;
+  margin: 0 6px;
+  transition: color 0.2s;
+}
+.link-item:hover { color: var(--accent2); text-decoration: underline; }
+
+/* 팝업 모달창 스타일 */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.7); /* 더 깊고 어두운 암전 효과 */
+  z-index: 9999;
+  justify-content: center; align-items: center;
+  padding: 16px;
+}
+.modal-content {
+  background: var(--card2); /* 기존 팝업 내부 컬러 연동 */
+  border: 1px solid var(--border);
+  padding: 25px;
+  border-radius: var(--radius);
+  width: 100%; max-width: 500px;
+  max-height: 75vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: var(--shadow);
+}
+.modal-close {
+  position: absolute; top: 15px; right: 20px;
+  font-size: 24px; cursor: pointer; color: var(--text-dim);
+}
+.modal-close:hover { color: var(--danger); }
+#modalTitle { color: var(--cream); font-size: 16px; font-weight: 700; margin-bottom: 15px; }
+.modal-text {
+  font-size: 13px; color: var(--text);
+  white-space: pre-wrap; text-align: left; line-height: 1.6;
+}
 </style>
 </head>
 <body>
@@ -1263,5 +1318,49 @@ function saveAsImage() {
     });
 }
 </script>
+<footer class="service-footer">
+  <div class="footer-container">
+    <p class="company-info">
+      <strong>(주)플래닛랩스(plan:it labs)</strong> | 대표자: 이종석 | 사업자등록번호: [승인 후 입력 예정]
+    </p>
+    <div class="footer-links">
+      <span class="link-item" onclick="openModal('terms')">이용약관</span> | 
+      <span class="link-item" onclick="openModal('privacy')">개인정보처리방침</span> | 
+      <span class="link-item" onclick="openModal('refund')">환불정책</span>
+    </div>
+  </div>
+</footer>
+
+<div id="policyModal" class="modal-overlay" onclick="closeModal()">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <span class="modal-close" onclick="closeModal()">&times;</span>
+    <h3 id="modalTitle">약관 제목</h3>
+    <div id="modalBody" class="modal-text">내용 들어가는 곳</div>
+  </div>
+</div>
 </body>
+  <script>
+  const policyTexts = {
+    terms: `[이용약관]\n\n제1조 (목적)\n본 약관은 플래닛랩스가 제공하는 LunaSync 및 관련 서비스의 이용 조건 및 절차를 규정합니다.\n\n제2조 (서비스의 제공)\n본 서비스는 사용자의 입력 데이터에 기반한 생체리듬 기반 시차 적응 가이드를 제공합니다.`,
+    privacy: `[개인정보처리방침]\n\n플래닛랩스는 사용자의 개인정보를 중요시합니다.\n\n1. 개인정보 수집 항목: 타임존 데이터, 수면 패턴, 이메일 주소\n2. 이용 목적: 맞춤형 시차 적응 플랜 생성 및 앱 서비스 개선`,
+    refund: `[환불정책]\n\n1. 본 서비스에서 제공하는 시차적응 플랜 분석 결과물은 디지털 콘텐츠 특성상 결제 및 열람이 완료된 후에는 원칙적으로 청약철회(환불)가 제한될 수 있습니다.\n2. 단, 시스템 오류 등 서비스 자체의 결함으로 정상 이용이 불가한 경우 고객센터를 통해 7일 이내에 전액 환불 조치 됩니다.`
+  };
+
+  function openModal(type) {
+    const modal = document.getElementById('policyModal');
+    const title = document.getElementById('modalTitle');
+    const body = document.getElementById('modalBody');
+    
+    if (type === 'terms') title.innerText = '이용약관';
+    else if (type === 'privacy') title.innerText = '개인정보처리방침';
+    else if (type === 'refund') title.innerText = '환불정책';
+    
+    body.innerText = policyTexts[type];
+    modal.style.display = 'flex';
+  }
+
+  function closeModal() {
+    document.getElementById('policyModal').style.display = 'none';
+  }
+</script>
 </html>
