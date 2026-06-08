@@ -900,105 +900,99 @@ function calculate() {
 var daysToAdapt = direction === "same" ? 0 : 4;
 
 /* shiftPerDay: 5일 안에 목표 취침 시간에 도달하는 1일 조정폭 */
+/* shiftPerDay: 5일 안에 목표 취침 시간에 도달하는 1일 조정폭 */
 var totalShift  = tzDiff; /* 도착지 취침 - 출발지 취침 (분) */
+var daysToAdapt = direction === "same" ? 0 : 4;
 var shiftPerDay = 0;
 
-// 1. 오타 수정: 괄호 ')' 추가함!
 if (direction !== "same" && daysToAdapt > 0) {
-  /* 기본적으로 5일 안에 totalShift를 균등하게 나누어 커버 */
+  // 기본적으로 daysToAdapt 일수만큼 쪼갬
   shiftPerDay = totalShift / daysToAdapt;
   
-  /* 1일 최대 90분 제한 (방향 부호 유지) */
-  var maxShift = direction === "east" ? -90 : 90;
-    if (direction === "east" && shiftPerDay < maxShift) {
-      shiftPerDay = maxShift;
-      daysToAdapt = Math.ceil(Math.abs(totalShift) / Math.abs(maxShift));
-    }
-    if (direction === "west" && shiftPerDay > maxShift) {
-      shiftPerDay = maxShift;
-      daysToAdapt = Math.ceil(Math.abs(totalShift) / Math.abs(maxShift));
-    }
-  /*
-    ─────────────────────────────────────────
-    1일차 취침: 평소 취침을 도착지 현지로 변환
-    (아직 적응 안 된 상태 = 그냥 내 몸이
-     출발지 시간대 취침 시간에 졸린 상태)
-    ─────────────────────────────────────────
-  */
-  var day1Bed = clampBed(homeBedMins + tzDiff);
-  var days = [];
-  for (var day = 0; day < 5; day++) {
+  // [수정] 동/서 방향에 따른 최대 조정폭 규제 완벽 보정
+  if (direction === "east" && shiftPerDay < -90) {
+    shiftPerDay = -90;
+    daysToAdapt = Math.ceil(Math.abs(totalShift) / 90);
+  }
+  if (direction === "west" && shiftPerDay > 90) {
+    shiftPerDay = 90;
+    daysToAdapt = Math.ceil(Math.abs(totalShift) / 90);
+  }
+}
 
-    /* ── 취침 시간 결정 ── */
-    var bedMins;
+/* ────────────────────────────────────────────────────────
+   1일차 취침: 평소 취침을 도착지 현지로 변환 (적응 전 내 몸 상태)
+──────────────────────────────────────────────────────── */
+var day1Bed = clampBed(homeBedMins + tzDiff);
+var days = [];
+
+for (var day = 0; day < 5; day++) {
+  /* ── 취침 시간 결정 ── */
+  var bedMins;
   
   if (day === 0) {
     bedMins = day1Bed;
   } else {
-    // 일단 계산상 가야 할 이상적인 시간
+    // 계산상 가야 할 이상적인 시간
     var idealBedMins = days[day - 1].sleepStart + shiftPerDay;
     
-    // 만약 이상적인 시간이 현실적 마지노선(20:00)보다 더 일찍 자라고 하는 상황이라면?
     if (direction === "east" && idealBedMins < BED_MIN) {
-      // [핵심 로직] 20:00 벽에 고정하지 말고, 최종 목표 시간(day1Bed)까지 
-      // 남은 일수(5일 중 현재 위치) 동안 아주 미세하게 나누어서 점진적으로 다가가게 만듦!
+      // [동쪽 예외처리] 20:00 벽에 고정되지 않게 쪼개기
       var remainingDays = 5 - day;
       var currentGap = day1Bed - days[day - 1].sleepStart;
-      
-      // 남은 일수만큼 갭을 쪼개서 점진적으로 변화를 줌 (3~5일차가 미세하게라도 계속 변함!)
       bedMins = days[day - 1].sleepStart + (currentGap / (remainingDays + 1));
       
-      // 그래도 최소한 BED_MIN(20:00) 보다는 늦게 자도록 안전장치
-      if (bedMins < BED_MIN) bedMins = BED_MIN + (day * 10); // 하루에 10분씩이라도 뒤로 밀어서 변별력 제공
-    } else {
-      // 정상 범위 내라면 기존처럼 clamp 처리
+      if (bedMins < BED_MIN) bedMins = BED_MIN + (day * 10); 
+    } 
+    else if (direction === "west" && idealBedMins > 120 && idealBedMins < 1200) {
+      // [서쪽 예외처리 추가!!] 새벽 2시(120분)를 뚫고 넘어가서 굳어버리는 버그 방어!
+      // 남은 일수만큼 목표치까지 점진적으로 당겨지게 빌드업함
+      var remainingDays = 5 - day;
+      // 도착지 기준 정상 수면 시간대로 부드럽게 연착륙 시킴
+      bedMins = days[day - 1].sleepStart + (shiftPerDay * 0.7); // 점진적 감속 조정
+      
+      // 혹시라도 굳는 걸 방지하기 위해 하루에 15분씩 앞으로 당겨서 변별력 제공
+      if (bedMins > 120) bedMins = 120 - (day * 15);
+    } 
+    else {
+      // 정상 범위 내라면 기존처럼 안정적으로 clamp 처리
       bedMins = clampBed(idealBedMins);
     }
   }
-console.log("day", day+1, "| 전날sleepStart:", day>0 ? days[day-1].sleepStart : "-", "| shiftPerDay:", shiftPerDay, "| 합산:", day>0 ? days[day-1].sleepStart + shiftPerDay : "-", "| clamp후:", bedMins);
-    var wakeMins = mod1440(bedMins + sleepMins);
 
-    /* ── 빛 노출 (기상 기준) ── */
-    var lightStart, lightEnd;
-    if (direction === "east") {
-      lightStart = mod1440(wakeMins);
-      lightEnd   = mod1440(wakeMins + 120);
-    } else if (direction === "west") {
-      lightStart = mod1440(wakeMins + 60);
-      lightEnd   = mod1440(wakeMins + 180);
-    } else {
-      lightStart = mod1440(wakeMins);
-      lightEnd   = mod1440(wakeMins + 120);
-    }
+  // 분 단위 보정 마지노선 래핑
+  bedMins = mod1440(Math.round(bedMins));
+  var wakeMins = mod1440(bedMins + sleepMins);
 
-    /* ── 청색광 차단: 취침 3시간 전 ~ 취침 30분 전 ── */
-    var avoidStart = mod1440(bedMins - 180);
-    var avoidEnd   = mod1440(bedMins - 30);
+  /* ── 빛 노출 (기상 기준) ── */
+  var lightStart, lightEnd;
+  if (direction === "east") {
+    lightStart = mod1440(wakeMins);
+    lightEnd   = mod1440(wakeMins + 120);
+  } else if (direction === "west") {
+    lightStart = mod1440(wakeMins + 60);
+    lightEnd   = mod1440(wakeMins + 180);
+  } else {
+    lightStart = mod1440(wakeMins);
+    lightEnd   = mod1440(wakeMins + 120);
+  }
 
-    /* ── 진행률 ── */
-    /*
-      day=0 → 0%  (아직 첫날)
-      day=4 → 100% (daysToAdapt=4 기준)
-    */
-    // --- 1~5일차 계산 루프 내부 ---
-    /* ────────────────────────────────────────────────────────
-       진행률(progress) 계산
-       day=0 → 0% (첫날) / day=4 → 100% (5일차 강제 골인 예외처리 보완)
-    ──────────────────────────────────────────────────────── */
-    var progress;
-    if (direction === "same") {
+  /* ── 청색광 차단: 취침 3시간 전 ~ 취침 30분 전 ── */
+  var avoidStart = mod1440(bedMins - 180);
+  var avoidEnd   = mod1440(bedMins - 30);
+
+  /* ── 진행률(progress) 계산 ── */
+  var progress;
+  if (direction === "same") {
+    progress = 100;
+  } else {
+    if (day === 4 || day >= daysToAdapt) {
       progress = 100;
     } else {
-      if (day === 4 || day >= daysToAdapt) {
-        progress = 100;
-      } else {
-        // 괄호 오타 수정 및 안전하게 진행률 계산
-        progress = Math.round((day / daysToAdapt) * 100);
-        
-        // 혹시라도 마지막 날이 아닌데 100%가 먼저 나오는 걸 방지하기 위해 최대 99%로 클램핑
-        if (progress >= 100) progress = 99; 
-      }
+      progress = Math.round((day / daysToAdapt) * 100);
+      if (progress >= 100) progress = 99; 
     }
+  }
 
     days.push({
       day:          day + 1,
