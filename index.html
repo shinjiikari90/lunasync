@@ -891,7 +891,8 @@ function calculate() {
 var rawTzDiff = destOffset - originOffset; 
 
 // 한국에서 출발하는 경우라면, 실제 물리적 시차(시간 단위)로 강제 변환
-var tzDiff = rawTzDiff; 
+console.log("DEBUG - originKey:", originKey, "TZ[originKey]:", TZ[originKey], "TZ[destKey]:", TZ[destKey]);
+  var tzDiff = rawTzDiff; 
 if (originKey === 'KR') {
     // 한국 시간 900(UTC+9)에서 실제 시차(시간) * 60분으로 계산
     // 예: 베트남(UTC+7) -> 한국과 2시간 차이 -> 2 * 60 = 120분
