@@ -925,38 +925,39 @@ if (direction !== "same" && daysToAdapt > 0) {
 ──────────────────────────────────────────────────────── */
 var day1Bed = clampBed(homeBedMins + tzDiff);
 var days = [];
+// [추가] 시차 3시간(180분) 미만 여부 확인
+var isSmallJetlag = Math.abs(tzDiff) < 180;
 
 for (var day = 0; day < 5; day++) {
-  /* ── 취침 시간 결정 ── */
   var bedMins;
   
   if (day === 0) {
     bedMins = day1Bed;
   } else {
-    // 계산상 가야 할 이상적인 시간
     var idealBedMins = days[day - 1].sleepStart + shiftPerDay;
     
-    if (direction === "east" && idealBedMins < BED_MIN) {
-      // [동쪽 예외처리] 20:00 벽에 고정되지 않게 쪼개기
+    // [핵심] 소시차면 변화폭을 하루 최대 20분으로 제한해서 널뛰기 방지!
+    var dailyChange = shiftPerDay;
+    if (isSmallJetlag) {
+        dailyChange = Math.max(Math.min(shiftPerDay, 20), -20);
+    }
+    
+    // 조정된 변화폭 적용
+    var targetMins = days[day - 1].sleepStart + dailyChange;
+
+    if (direction === "east" && targetMins < BED_MIN) {
       var remainingDays = 5 - day;
       var currentGap = day1Bed - days[day - 1].sleepStart;
       bedMins = days[day - 1].sleepStart + (currentGap / (remainingDays + 1));
-      
       if (bedMins < BED_MIN) bedMins = BED_MIN + (day * 10); 
     } 
-    else if (direction === "west" && idealBedMins > 120 && idealBedMins < 1200) {
-      // [서쪽 예외처리 추가!!] 새벽 2시(120분)를 뚫고 넘어가서 굳어버리는 버그 방어!
-      // 남은 일수만큼 목표치까지 점진적으로 당겨지게 빌드업함
+    else if (direction === "west" && targetMins > 120 && targetMins < 1200) {
       var remainingDays = 5 - day;
-      // 도착지 기준 정상 수면 시간대로 부드럽게 연착륙 시킴
-      bedMins = days[day - 1].sleepStart + (shiftPerDay * 0.7); // 점진적 감속 조정
-      
-      // 혹시라도 굳는 걸 방지하기 위해 하루에 15분씩 앞으로 당겨서 변별력 제공
+      bedMins = days[day - 1].sleepStart + (dailyChange * 0.7);
       if (bedMins > 120) bedMins = 120 - (day * 15);
     } 
     else {
-      // 정상 범위 내라면 기존처럼 안정적으로 clamp 처리
-      bedMins = clampBed(idealBedMins);
+      bedMins = clampBed(targetMins);
     }
   }
 
