@@ -887,6 +887,7 @@ function calculate() {
   var takeoffTime = document.getElementById("takeoff-time").value;
   var landingTime = document.getElementById("landing-time").value;
   var bedTimeStr  = document.getElementById("sleep-bed").value;
+  console.log("DEBUG - 입력받은 원본 시간 문자열:", bedTimeStr); // 이거 꼭 찍어보셈
   var sleepHours  = parseFloat(document.getElementById("sleep-hours").value) || 8;
 
   var originOffset = parseInt(TZ[originKey], 10);
