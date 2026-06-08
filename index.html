@@ -903,8 +903,8 @@ var destOffset   = parseInt(TZ[destKey], 10);
 // 만약 신지군이 120분을 원한다면, TZ 데이터 자체가 900/420이 아니라 9/7로 되어있어야 함.
 // 데이터가 900/420인 상태에서 시차를 120으로 만들려면 아래 공식을 써야 함.
 var rawTzDiff = (destOffset - originOffset); 
-
-console.log("DEBUG - originKey:", originKey, "TZ[originKey]:", TZ[originKey], "TZ[destKey]:", TZ[destKey]);
+console.log("DEBUG - 최종 확인: destOffset:", destOffset, "originOffset:", originOffset, "tzDiff:", tzDiff);
+console.log("DEBUG - 계산 전 homeBedMins:", homeBedMins);
 
 var tzDiff = rawTzDiff; 
 
@@ -976,11 +976,7 @@ if (direction !== "same" && daysToAdapt > 0) {
 var homeBedMins = timeToMins(bedTimeStr); 
 var day1Bed = (homeBedMins - tzDiff) % 1440;
 if (day1Bed < 0) day1Bed += 1440;
-
-// 로그로 검증
-console.log("DEBUG - 최종 입력값 확인 -> homeBedMins:", homeBedMins, "tzDiff:", tzDiff);
-console.log("DEBUG - 1일차 취침 시간 확정:", day1Bed);
-
+console.log("DEBUG - 계산 후 day1Bed:", day1Bed);
 var days = [];
 var isSmallJetlag = Math.abs(tzDiff) < 180;
 
