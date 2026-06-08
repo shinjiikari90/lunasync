@@ -809,11 +809,11 @@ var BED_MAX       = 1440 * 120;       /* 02:00 (다음날) = 1440+120 */
 function clampBed(m) {
   m = mod1440(m);
   // 금지 구간: 02:01(121분) ~ 19:59(1199분)
-  if (m > 240 && m < 1200) {
+  if (m > 120 && m < 1200) {
     // 가까운 경계로 끌어당김
-    var distTo0400   = m - 240;
+    var distTo0200   = m - 120;
     var distTo2000   = 1200 - m;
-    return distTo0400 < distTo2000 ? 240 : 1200;
+    return distTo0200 < distTo2000 ? 120 : 1200;
   }
   return m;
 }
