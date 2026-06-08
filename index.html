@@ -885,6 +885,8 @@ function calculate() {
 
   var originOffset = TZ[originKey] != null ? TZ[originKey] : 540;
   var destOffset   = TZ[destKey]   != null ? TZ[destKey]   : 0;
+  console.log("계산 전 - 출발지 Offset:", originOffset, "도착지 Offset:", destOffset);
+console.log("계산 후 - 시차(분):", tzDiff);
   var tzDiff       = destOffset - originOffset;
   var crossedZones = Math.round(Math.abs(tzDiff) / 60);
   var sleepMins    = Math.round(sleepHours * 60);
