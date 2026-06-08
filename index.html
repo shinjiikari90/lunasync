@@ -883,8 +883,15 @@ function calculate() {
   var bedTimeStr  = document.getElementById("sleep-bed").value;
   var sleepHours  = parseFloat(document.getElementById("sleep-hours").value) || 8;
 
-  var originOffset = TZ[originKey] != null ? TZ[originKey] : 540;
-  var destOffset   = TZ[destKey]   != null ? TZ[destKey]   : 0;
+  // [수정] TZ 데이터가 없으면 무조건 540(한국)으로, 그리고 확실히 숫자로 변환!
+  var originOffset = parseInt(TZ[originKey] ?? 540, 10);
+  var destOffset   = parseInt(TZ[destKey]   ?? 540, 10);
+  
+  // 시차 계산 (이제 숫자로 깔끔하게 계산됨)
+  var tzDiff       = destOffset - originOffset;
+  
+  // 디버깅용: 널뛰기하는지 여기서 확인 가능
+  console.log("최종 시차(분):", tzDiff);
   console.log("계산 전 - 출발지 Offset:", originOffset, "도착지 Offset:", destOffset);
 console.log("계산 후 - 시차(분):", tzDiff);
   var tzDiff       = destOffset - originOffset;
