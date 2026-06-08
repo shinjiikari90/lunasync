@@ -888,31 +888,35 @@ function calculate() {
   var destOffset   = parseInt(TZ[destKey]   ?? 540, 10);
   
   // 시차 계산 (이제 숫자로 깔끔하게 계산됨)
-  var tzDiff       = destOffset - originOffset;
+var tzDiff = destOffset - originOffset;
   
-  // 디버깅용: 널뛰기하는지 여기서 확인 가능
-  console.log("최종 시차(분):", tzDiff);
-  console.log("계산 전 - 출발지 Offset:", originOffset, "도착지 Offset:", destOffset);
+// 디버깅용: 널뛰기하는지 여기서 확인 가능
+console.log("최종 시차(분):", tzDiff);
+console.log("계산 전 - 출발지 Offset:", originOffset, "도착지 Offset:", destOffset);
 console.log("계산 후 - 시차(분):", tzDiff);
-  var tzDiff       = destOffset - originOffset;
-  var crossedZones = Math.round(Math.abs(tzDiff) / 60);
-  var sleepMins    = Math.round(sleepHours * 60);
 
-  var homeBedMins  = timeToMins(bedTimeStr);
+var crossedZones = Math.round(Math.abs(tzDiff) / 60);
+var sleepMins    = Math.round(sleepHours * 60);
+var homeBedMins  = timeToMins(bedTimeStr);
 
-  var direction, dirLabel, dirClass;
-  if      (tzDiff >  30) { direction = "east"; dirLabel = "동쪽 이동 (시간 앞당기기)"; dirClass = "dir-east"; }
-  else if (tzDiff < -30) { direction = "west"; dirLabel = "이동 (시간 늦추기)";   dirClass = "dir-west"; }
-  else                   { direction = "same"; dirLabel = "시차 거의 없음";             dirClass = "dir-same"; }
+var direction, dirLabel, dirClass;
+if      (tzDiff > 30)  { direction = "east"; dirLabel = "동쪽 이동 (시간 앞당기기)"; dirClass = "dir-east"; }
+else if (tzDiff < -30) { direction = "west"; dirLabel = "이동 (시간 늦추기)";   dirClass = "dir-west"; }
+else                   { direction = "same"; dirLabel = "시차 거의 없음";              dirClass = "dir-same"; }
 
-  var realDaysToAdapt = direction !== "same" ? Math.ceil(Math.abs(tzDiff) / 60) : 0;
+// 변수 중복 선언 제거: 여기서 한 번만 선언
 var daysToAdapt = direction === "same" ? 0 : 4;
+var realDaysToAdapt = direction !== "same" ? Math.ceil(Math.abs(tzDiff) / 60) : 0;
 
 /* shiftPerDay: 5일 안에 목표 취침 시간에 도달하는 1일 조정폭 */
-/* shiftPerDay: 5일 안에 목표 취침 시간에 도달하는 1일 조정폭 */
-var totalShift  = tzDiff; /* 도착지 취침 - 출발지 취침 (분) */
-var daysToAdapt = direction === "same" ? 0 : 4;
-var shiftPerDay = 0;
+var totalShift  = tzDiff; 
+var shiftPerDay = (direction === "same") ? 0 : (tzDiff / 4);
+
+// [중요] 주석 오류 수정
+// 시차가 없을 때 0이 되는 걸 방지하려면 아래 조건도 확인!
+if (direction === "same") {
+    shiftPerDay = 0;
+}
 
 if (direction !== "same" && daysToAdapt > 0) {
   // 기본적으로 daysToAdapt 일수만큼 쪼갬
@@ -928,7 +932,6 @@ if (direction !== "same" && daysToAdapt > 0) {
     daysToAdapt = Math.ceil(Math.abs(totalShift) / 90);
   }
 }
-
 /* ────────────────────────────────────────────────────────
    1일차 취침: 평소 취침을 도착지 현지로 변환 (적응 전 내 몸 상태)
 ──────────────────────────────────────────────────────── */
