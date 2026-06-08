@@ -971,11 +971,16 @@ for (var day = 0; day < 5; day++) {
   if (day === 0) {
     bedMins = day1Bed;
   } else {
-    // [수정] day가 커질수록 이동폭을 80%씩 줄임 (첫날 100%, 둘째날 80%, 셋째날 64%...)
-    var decayFactor = Math.pow(0.8, day - 1); 
-    var currentShift = shiftPerDay * decayFactor;
+    // [핵심] shiftPerDay는 이동량(절댓값)이고, 
+    // direction에 따라 + 또는 -를 결정해야 함!
+    var directionMultiplier = (direction === "east") ? -1 : 1;
+    var rawShift = Math.abs(shiftPerDay) * directionMultiplier;
     
-    // 1. 가속/감속이 적용된 ideal 계산
+    // 감속 계수 적용
+    var decayFactor = Math.pow(0.8, day - 1); 
+    var currentShift = rawShift * decayFactor;
+    
+    // 1. 방향성이 적용된 ideal 계산
     var idealBedMins = days[day - 1].sleepStart + currentShift;
     
     // 2. [울타리] 시차가 작으면 하루 20분 제한
