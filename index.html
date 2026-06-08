@@ -984,7 +984,11 @@ for (var day = 0; day < 5; day++) {
     }
     
     // 3. 이제 이 targetMins를 써서 예외처리 진행
-    var targetMins = finalTarget; 
+    var targetMins = finalTarget;
+    var MIN_LIMIT = 1320; // 22:00
+if (targetMins < MIN_LIMIT) {
+    targetMins = MIN_LIMIT;
+}
 
     if (direction === "east" && targetMins < BED_MIN) {
       var remainingDays = 5 - day;
