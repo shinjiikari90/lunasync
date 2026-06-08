@@ -985,9 +985,11 @@ for (var day = 0; day < 5; day++) {
     
     // 3. 이제 이 targetMins를 써서 예외처리 진행
     var targetMins = finalTarget;
-    var MIN_LIMIT = 1320; // 22:00
+    var MIN_LIMIT = 1320; 
 if (targetMins < MIN_LIMIT) {
-    targetMins = MIN_LIMIT;
+    // 22:00보다 이르면, 원래 이동하려던 폭의 절반만 이동해서 완만하게 접근
+    var originalShift = targetMins - days[day - 1].sleepStart;
+    targetMins = days[day - 1].sleepStart + (originalShift * 0.5); 
 }
 
     if (direction === "east" && targetMins < BED_MIN) {
